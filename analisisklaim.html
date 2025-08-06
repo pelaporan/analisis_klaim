@@ -39,12 +39,11 @@
                 <div class="flex items-center bg-white bg-opacity-15 rounded-xl px-6 py-3 backdrop-blur-sm border border-white border-opacity-20">
                     <span class="text-sm font-medium mr-4">📅 Tahun Data:</span>
                     <div class="flex items-center space-x-3">
-                        <span class="text-sm font-medium">2024</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="yearToggle" checked>
-                            <span class="slider"></span>
-                        </label>
-                        <span class="text-sm font-medium">2025</span>
+                        <select id="yearSelect" class="bg-white bg-opacity-20 text-white border border-white border-opacity-30 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50">
+                            <option value="2024" class="text-gray-800">2024</option>
+                            <option value="2025" class="text-gray-800" selected>2025</option>
+                            <option value="2026" class="text-gray-800">2026</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -130,7 +129,22 @@ function doGet(e) {
     const year = e.parameter.year || '2025';
     
     // ⚠️ GANTI DENGAN SHEET ID ANDA
-    const spreadsheetId = year === '2025' ? 'YOUR_2025_SHEET_ID' : 'YOUR_2024_SHEET_ID';
+    let spreadsheetId;
+    if (year === '2030') {
+      spreadsheetId = 'YOUR_2030_SHEET_ID';
+    } else if (year === '2029') {
+      spreadsheetId = 'YOUR_2029_SHEET_ID';
+    } else if (year === '2028') {
+      spreadsheetId = 'YOUR_2028_SHEET_ID';
+    } else if (year === '2027') {
+      spreadsheetId = 'YOUR_2027_SHEET_ID';
+    } else if (year === '2026') {
+      spreadsheetId = 'YOUR_2026_SHEET_ID';
+    } else if (year === '2025') {
+      spreadsheetId = 'YOUR_2025_SHEET_ID';
+    } else {
+      spreadsheetId = 'YOUR_2024_SHEET_ID';
+    }
     
     // Buka spreadsheet dan ambil data
     const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
@@ -230,6 +244,126 @@ function testFunction() {
   const testResult = doGet({ parameter: { year: '2025' } });
   console.log(testResult.getContent());
 }</pre>
+                    </div>
+                </div>
+
+                <!-- 2030 Configuration -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-4">Data 2030</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Spreadsheet ID</label>
+                            <input type="text" id="spreadsheetId2030" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="1abc123def456...">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Sheet</label>
+                            <input type="text" id="sheetName2030" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Sheet1" value="rekap_bliing">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">GID (Optional)</label>
+                            <input type="text" id="gid2030" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0">
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-lg">
+                            <label class="block text-sm font-medium text-green-800 mb-2">⚡ Apps Script URL (Opsional - untuk loading cepat)</label>
+                            <input type="text" id="appsScriptUrl2030" class="w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
+                            <p class="text-xs text-green-600 mt-1">Jika diisi, sistem akan menggunakan Apps Script untuk loading data yang lebih cepat</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2029 Configuration -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-4">Data 2029</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Spreadsheet ID</label>
+                            <input type="text" id="spreadsheetId2029" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="1abc123def456...">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Sheet</label>
+                            <input type="text" id="sheetName2029" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Sheet1" value="rekap_bliing">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">GID (Optional)</label>
+                            <input type="text" id="gid2029" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0">
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-lg">
+                            <label class="block text-sm font-medium text-green-800 mb-2">⚡ Apps Script URL (Opsional - untuk loading cepat)</label>
+                            <input type="text" id="appsScriptUrl2029" class="w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
+                            <p class="text-xs text-green-600 mt-1">Jika diisi, sistem akan menggunakan Apps Script untuk loading data yang lebih cepat</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2028 Configuration -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-4">Data 2028</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Spreadsheet ID</label>
+                            <input type="text" id="spreadsheetId2028" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="1abc123def456...">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Sheet</label>
+                            <input type="text" id="sheetName2028" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Sheet1" value="rekap_bliing">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">GID (Optional)</label>
+                            <input type="text" id="gid2028" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0">
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-lg">
+                            <label class="block text-sm font-medium text-green-800 mb-2">⚡ Apps Script URL (Opsional - untuk loading cepat)</label>
+                            <input type="text" id="appsScriptUrl2028" class="w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
+                            <p class="text-xs text-green-600 mt-1">Jika diisi, sistem akan menggunakan Apps Script untuk loading data yang lebih cepat</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2027 Configuration -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-4">Data 2027</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Spreadsheet ID</label>
+                            <input type="text" id="spreadsheetId2027" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="1abc123def456...">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Sheet</label>
+                            <input type="text" id="sheetName2027" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Sheet1" value="rekap_bliing">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">GID (Optional)</label>
+                            <input type="text" id="gid2027" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0">
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-lg">
+                            <label class="block text-sm font-medium text-green-800 mb-2">⚡ Apps Script URL (Opsional - untuk loading cepat)</label>
+                            <input type="text" id="appsScriptUrl2027" class="w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
+                            <p class="text-xs text-green-600 mt-1">Jika diisi, sistem akan menggunakan Apps Script untuk loading data yang lebih cepat</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2026 Configuration -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-4">Data 2026</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Spreadsheet ID</label>
+                            <input type="text" id="spreadsheetId2026" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="1abc123def456...">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Sheet</label>
+                            <input type="text" id="sheetName2026" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Sheet1" value="rekap_bliing">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">GID (Optional)</label>
+                            <input type="text" id="gid2026" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0">
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-lg">
+                            <label class="block text-sm font-medium text-green-800 mb-2">⚡ Apps Script URL (Opsional - untuk loading cepat)</label>
+                            <input type="text" id="appsScriptUrl2026" class="w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
+                            <p class="text-xs text-green-600 mt-1">Jika diisi, sistem akan menggunakan Apps Script untuk loading data yang lebih cepat</p>
+                        </div>
                     </div>
                 </div>
 
@@ -881,6 +1015,31 @@ function testFunction() {
 
         // Configuration for Google Sheets
         const SPREADSHEET_CONFIG = {
+            2030: {
+                id: '',
+                sheetName: 'rekap_bliing',
+                gid: '0'
+            },
+            2029: {
+                id: '',
+                sheetName: 'rekap_bliing',
+                gid: '0'
+            },
+            2028: {
+                id: '',
+                sheetName: 'rekap_bliing',
+                gid: '0'
+            },
+            2027: {
+                id: '',
+                sheetName: 'rekap_bliing',
+                gid: '0'
+            },
+            2026: {
+                id: '',
+                sheetName: 'rekap_bliing',
+                gid: '0'
+            },
             2025: {
                 id: '2PACX-1vTxt2W5FP7inmzmBNBPKVnLPhnLt_EOwgJ866RNLjy4U9SpXUI35PBTAFQxlclLW1uU47JDfd0o3cIw',
                 sheetName: 'rekap_bliing',
@@ -2376,6 +2535,31 @@ function testFunction() {
                 Object.assign(SPREADSHEET_CONFIG, config);
                 
                 // Populate form fields
+                document.getElementById('spreadsheetId2030').value = config[2030]?.id || '';
+                document.getElementById('sheetName2030').value = config[2030]?.sheetName || 'rekap_bliing';
+                document.getElementById('gid2030').value = config[2030]?.gid || '';
+                document.getElementById('appsScriptUrl2030').value = config[2030]?.appsScriptUrl || '';
+                
+                document.getElementById('spreadsheetId2029').value = config[2029]?.id || '';
+                document.getElementById('sheetName2029').value = config[2029]?.sheetName || 'rekap_bliing';
+                document.getElementById('gid2029').value = config[2029]?.gid || '';
+                document.getElementById('appsScriptUrl2029').value = config[2029]?.appsScriptUrl || '';
+                
+                document.getElementById('spreadsheetId2028').value = config[2028]?.id || '';
+                document.getElementById('sheetName2028').value = config[2028]?.sheetName || 'rekap_bliing';
+                document.getElementById('gid2028').value = config[2028]?.gid || '';
+                document.getElementById('appsScriptUrl2028').value = config[2028]?.appsScriptUrl || '';
+                
+                document.getElementById('spreadsheetId2027').value = config[2027]?.id || '';
+                document.getElementById('sheetName2027').value = config[2027]?.sheetName || 'rekap_bliing';
+                document.getElementById('gid2027').value = config[2027]?.gid || '';
+                document.getElementById('appsScriptUrl2027').value = config[2027]?.appsScriptUrl || '';
+                
+                document.getElementById('spreadsheetId2026').value = config[2026]?.id || '';
+                document.getElementById('sheetName2026').value = config[2026]?.sheetName || 'rekap_bliing';
+                document.getElementById('gid2026').value = config[2026]?.gid || '';
+                document.getElementById('appsScriptUrl2026').value = config[2026]?.appsScriptUrl || '';
+                
                 document.getElementById('spreadsheetId2025').value = config[2025]?.id || '';
                 document.getElementById('sheetName2025').value = config[2025]?.sheetName || 'rekap_bliing';
                 document.getElementById('gid2025').value = config[2025]?.gid || '';
@@ -2392,6 +2576,36 @@ function testFunction() {
 
         function saveConfigToStorage() {
             const config = {
+                2030: {
+                    id: document.getElementById('spreadsheetId2030').value.trim(),
+                    sheetName: document.getElementById('sheetName2030').value.trim() || 'rekap_bliing',
+                    gid: document.getElementById('gid2030').value.trim(),
+                    appsScriptUrl: document.getElementById('appsScriptUrl2030').value.trim()
+                },
+                2029: {
+                    id: document.getElementById('spreadsheetId2029').value.trim(),
+                    sheetName: document.getElementById('sheetName2029').value.trim() || 'rekap_bliing',
+                    gid: document.getElementById('gid2029').value.trim(),
+                    appsScriptUrl: document.getElementById('appsScriptUrl2029').value.trim()
+                },
+                2028: {
+                    id: document.getElementById('spreadsheetId2028').value.trim(),
+                    sheetName: document.getElementById('sheetName2028').value.trim() || 'rekap_bliing',
+                    gid: document.getElementById('gid2028').value.trim(),
+                    appsScriptUrl: document.getElementById('appsScriptUrl2028').value.trim()
+                },
+                2027: {
+                    id: document.getElementById('spreadsheetId2027').value.trim(),
+                    sheetName: document.getElementById('sheetName2027').value.trim() || 'rekap_bliing',
+                    gid: document.getElementById('gid2027').value.trim(),
+                    appsScriptUrl: document.getElementById('appsScriptUrl2027').value.trim()
+                },
+                2026: {
+                    id: document.getElementById('spreadsheetId2026').value.trim(),
+                    sheetName: document.getElementById('sheetName2026').value.trim() || 'rekap_bliing',
+                    gid: document.getElementById('gid2026').value.trim(),
+                    appsScriptUrl: document.getElementById('appsScriptUrl2026').value.trim()
+                },
                 2025: {
                     id: document.getElementById('spreadsheetId2025').value.trim(),
                     sheetName: document.getElementById('sheetName2025').value.trim() || 'rekap_bliing',
@@ -2406,9 +2620,9 @@ function testFunction() {
                 }
             };
 
-            // Validate required fields
-            if (!config[2025].id || !config[2024].id) {
-                alert('Spreadsheet ID wajib diisi untuk kedua tahun!');
+            // Validate required fields - at least one year must have ID
+            if (!config[2030].id && !config[2029].id && !config[2028].id && !config[2027].id && !config[2026].id && !config[2025].id && !config[2024].id) {
+                alert('Minimal satu tahun harus memiliki Spreadsheet ID!');
                 return false;
             }
 
@@ -2426,6 +2640,31 @@ function testFunction() {
             localStorage.removeItem('hospitalDashboardConfig');
             
             // Reset form fields
+            document.getElementById('spreadsheetId2030').value = '';
+            document.getElementById('sheetName2030').value = 'rekap_bliing';
+            document.getElementById('gid2030').value = '';
+            document.getElementById('appsScriptUrl2030').value = '';
+            
+            document.getElementById('spreadsheetId2029').value = '';
+            document.getElementById('sheetName2029').value = 'rekap_bliing';
+            document.getElementById('gid2029').value = '';
+            document.getElementById('appsScriptUrl2029').value = '';
+            
+            document.getElementById('spreadsheetId2028').value = '';
+            document.getElementById('sheetName2028').value = 'rekap_bliing';
+            document.getElementById('gid2028').value = '';
+            document.getElementById('appsScriptUrl2028').value = '';
+            
+            document.getElementById('spreadsheetId2027').value = '';
+            document.getElementById('sheetName2027').value = 'rekap_bliing';
+            document.getElementById('gid2027').value = '';
+            document.getElementById('appsScriptUrl2027').value = '';
+            
+            document.getElementById('spreadsheetId2026').value = '';
+            document.getElementById('sheetName2026').value = 'rekap_bliing';
+            document.getElementById('gid2026').value = '';
+            document.getElementById('appsScriptUrl2026').value = '';
+            
             document.getElementById('spreadsheetId2025').value = '';
             document.getElementById('sheetName2025').value = 'rekap_bliing';
             document.getElementById('gid2025').value = '';
@@ -2437,6 +2676,11 @@ function testFunction() {
             document.getElementById('appsScriptUrl2024').value = '';
             
             // Reset to default config
+            SPREADSHEET_CONFIG[2030] = { id: '', sheetName: 'rekap_bliing', gid: '', appsScriptUrl: '' };
+            SPREADSHEET_CONFIG[2029] = { id: '', sheetName: 'rekap_bliing', gid: '', appsScriptUrl: '' };
+            SPREADSHEET_CONFIG[2028] = { id: '', sheetName: 'rekap_bliing', gid: '', appsScriptUrl: '' };
+            SPREADSHEET_CONFIG[2027] = { id: '', sheetName: 'rekap_bliing', gid: '', appsScriptUrl: '' };
+            SPREADSHEET_CONFIG[2026] = { id: '', sheetName: 'rekap_bliing', gid: '', appsScriptUrl: '' };
             SPREADSHEET_CONFIG[2025] = { id: '', sheetName: 'rekap_bliing', gid: '', appsScriptUrl: '' };
             SPREADSHEET_CONFIG[2024] = { id: '', sheetName: 'rekap_bliing', gid: '', appsScriptUrl: '' };
             
@@ -2491,9 +2735,9 @@ function testFunction() {
             // Refresh button
             document.getElementById('refreshBtn').addEventListener('click', refreshData);
 
-            // Year toggle
-            document.getElementById('yearToggle').addEventListener('change', function() {
-                currentYear = this.checked ? 2025 : 2024;
+            // Year selector
+            document.getElementById('yearSelect').addEventListener('change', function() {
+                currentYear = parseInt(this.value);
                 document.getElementById('currentYearDisplay').textContent = currentYear;
                 loadData(currentYear);
             });
@@ -2613,5 +2857,5 @@ function testFunction() {
             loadData(currentYear);
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96ab387383e7ec6e',t:'MTc1NDQ0ODU2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96acfdb89542fe1b',t:'MTc1NDQ2NzEyNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
