@@ -39,12 +39,15 @@
                 <div class="flex items-center bg-white bg-opacity-15 rounded-xl px-6 py-3 backdrop-blur-sm border border-white border-opacity-20">
                     <span class="text-sm font-medium mr-4">📅 Tahun Data:</span>
                     <div class="flex items-center space-x-3">
-                        <span class="text-sm font-medium">2024</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="yearToggle" checked>
-                            <span class="slider"></span>
-                        </label>
-                        <span class="text-sm font-medium">2025</span>
+                        <select id="yearSelect" class="bg-white bg-opacity-20 text-white border border-white border-opacity-30 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50">
+                            <option value="2024" class="text-gray-800">2024</option>
+                            <option value="2025" class="text-gray-800" selected>2025</option>
+                            <option value="2026" class="text-gray-800">2026</option>
+                            <option value="2027" class="text-gray-800">2027</option>
+                            <option value="2028" class="text-gray-800">2028</option>
+                            <option value="2029" class="text-gray-800">2029</option>
+                            <option value="2030" class="text-gray-800">2030</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -130,7 +133,22 @@ function doGet(e) {
     const year = e.parameter.year || '2025';
     
     // ⚠️ GANTI DENGAN SHEET ID ANDA
-    const spreadsheetId = year === '2025' ? 'YOUR_2025_SHEET_ID' : 'YOUR_2024_SHEET_ID';
+    let spreadsheetId;
+    if (year === '2030') {
+      spreadsheetId = 'YOUR_2030_SHEET_ID';
+    } else if (year === '2029') {
+      spreadsheetId = 'YOUR_2029_SHEET_ID';
+    } else if (year === '2028') {
+      spreadsheetId = 'YOUR_2028_SHEET_ID';
+    } else if (year === '2027') {
+      spreadsheetId = 'YOUR_2027_SHEET_ID';
+    } else if (year === '2026') {
+      spreadsheetId = 'YOUR_2026_SHEET_ID';
+    } else if (year === '2025') {
+      spreadsheetId = 'YOUR_2025_SHEET_ID';
+    } else {
+      spreadsheetId = 'YOUR_2024_SHEET_ID';
+    }
     
     // Buka spreadsheet dan ambil data
     const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
@@ -230,6 +248,126 @@ function testFunction() {
   const testResult = doGet({ parameter: { year: '2025' } });
   console.log(testResult.getContent());
 }</pre>
+                    </div>
+                </div>
+
+                <!-- 2030 Configuration -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-4">Data 2030</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Spreadsheet ID</label>
+                            <input type="text" id="spreadsheetId2030" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="1abc123def456...">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Sheet</label>
+                            <input type="text" id="sheetName2030" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Sheet1" value="rekap_bliing">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">GID (Optional)</label>
+                            <input type="text" id="gid2030" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0">
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-lg">
+                            <label class="block text-sm font-medium text-green-800 mb-2">⚡ Apps Script URL (Opsional - untuk loading cepat)</label>
+                            <input type="text" id="appsScriptUrl2030" class="w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
+                            <p class="text-xs text-green-600 mt-1">Jika diisi, sistem akan menggunakan Apps Script untuk loading data yang lebih cepat</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2029 Configuration -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-4">Data 2029</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Spreadsheet ID</label>
+                            <input type="text" id="spreadsheetId2029" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="1abc123def456...">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Sheet</label>
+                            <input type="text" id="sheetName2029" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Sheet1" value="rekap_bliing">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">GID (Optional)</label>
+                            <input type="text" id="gid2029" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0">
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-lg">
+                            <label class="block text-sm font-medium text-green-800 mb-2">⚡ Apps Script URL (Opsional - untuk loading cepat)</label>
+                            <input type="text" id="appsScriptUrl2029" class="w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
+                            <p class="text-xs text-green-600 mt-1">Jika diisi, sistem akan menggunakan Apps Script untuk loading data yang lebih cepat</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2028 Configuration -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-4">Data 2028</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Spreadsheet ID</label>
+                            <input type="text" id="spreadsheetId2028" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="1abc123def456...">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Sheet</label>
+                            <input type="text" id="sheetName2028" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Sheet1" value="rekap_bliing">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">GID (Optional)</label>
+                            <input type="text" id="gid2028" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0">
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-lg">
+                            <label class="block text-sm font-medium text-green-800 mb-2">⚡ Apps Script URL (Opsional - untuk loading cepat)</label>
+                            <input type="text" id="appsScriptUrl2028" class="w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
+                            <p class="text-xs text-green-600 mt-1">Jika diisi, sistem akan menggunakan Apps Script untuk loading data yang lebih cepat</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2027 Configuration -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-4">Data 2027</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Spreadsheet ID</label>
+                            <input type="text" id="spreadsheetId2027" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="1abc123def456...">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Sheet</label>
+                            <input type="text" id="sheetName2027" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Sheet1" value="rekap_bliing">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">GID (Optional)</label>
+                            <input type="text" id="gid2027" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0">
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-lg">
+                            <label class="block text-sm font-medium text-green-800 mb-2">⚡ Apps Script URL (Opsional - untuk loading cepat)</label>
+                            <input type="text" id="appsScriptUrl2027" class="w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
+                            <p class="text-xs text-green-600 mt-1">Jika diisi, sistem akan menggunakan Apps Script untuk loading data yang lebih cepat</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2026 Configuration -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-4">Data 2026</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Spreadsheet ID</label>
+                            <input type="text" id="spreadsheetId2026" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="1abc123def456...">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Sheet</label>
+                            <input type="text" id="sheetName2026" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Sheet1" value="rekap_bliing">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">GID (Optional)</label>
+                            <input type="text" id="gid2026" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0">
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-lg">
+                            <label class="block text-sm font-medium text-green-800 mb-2">⚡ Apps Script URL (Opsional - untuk loading cepat)</label>
+                            <input type="text" id="appsScriptUrl2026" class="w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
+                            <p class="text-xs text-green-600 mt-1">Jika diisi, sistem akan menggunakan Apps Script untuk loading data yang lebih cepat</p>
+                        </div>
                     </div>
                 </div>
 
@@ -535,6 +673,9 @@ function testFunction() {
                     <button class="tab-button py-4 px-2 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 flex items-center gap-2" data-tab="reports">
                         📋 Reports
                     </button>
+                    <button class="tab-button py-4 px-2 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 flex items-center gap-2" data-tab="comparison">
+                        📊 Perbandingan Tahun
+                    </button>
                 </nav>
             </div>
         </div>
@@ -614,6 +755,272 @@ function testFunction() {
                             </tr>
                         </tfoot>
                     </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Tab -->
+        <div id="comparison-tab" class="tab-content hidden">
+            <!-- Year Comparison Controls -->
+            <div class="bg-white rounded-xl p-6 card-shadow mb-8">
+                <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6 mb-6">
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">📊 Perbandingan Data Antar Tahun</h3>
+                        <p class="text-gray-600">Bandingkan data klaim, billing, dan jumlah pasien antara tahun yang berbeda</p>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex items-center gap-3">
+                            <label class="text-sm font-medium text-gray-700">Tahun Utama:</label>
+                            <select id="primaryYear" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="2024">2024</option>
+                                <option value="2025" selected>2025</option>
+                                <option value="2026">2026</option>
+                                <option value="2027">2027</option>
+                                <option value="2028">2028</option>
+                                <option value="2029">2029</option>
+                                <option value="2030">2030</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex items-center gap-3">
+                            <label class="text-sm font-medium text-gray-700">Bandingkan dengan:</label>
+                            <select id="comparisonYear" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="2024" selected>2024</option>
+                                <option value="2025">2025</option>
+                                <option value="2026">2026</option>
+                                <option value="2027">2027</option>
+                                <option value="2028">2028</option>
+                                <option value="2029">2029</option>
+                                <option value="2030">2030</option>
+                            </select>
+                        </div>
+                        
+                        <button id="loadComparisonData" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                            🔄 Muat Data Perbandingan
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="comparisonStatus" class="text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-lg">
+                    📊 Pilih tahun dan klik "Muat Data Perbandingan" untuk memulai analisis
+                </div>
+            </div>
+
+            <!-- Comparison Charts -->
+            <div class="space-y-8">
+                <!-- Klaim Comparison -->
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800">💰 Perbandingan Total Klaim Bulanan</h3>
+                        <div class="flex gap-2">
+                            <button id="klaimComparisonChartToggle" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors">
+                                📈 Line Chart
+                            </button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-medium text-gray-700 mb-4">🛏️ Rawat Inap</h4>
+                            <div class="relative h-80">
+                                <canvas id="klaimRanapComparisonChart"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-medium text-gray-700 mb-4">🚶 Rawat Jalan</h4>
+                            <div class="relative h-80">
+                                <canvas id="klaimRalanComparisonChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Billing Comparison -->
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800">💵 Perbandingan Total Billing Bulanan</h3>
+                        <div class="flex gap-2">
+                            <button id="billingComparisonChartToggle" class="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm hover:bg-green-200 transition-colors">
+                                📈 Line Chart
+                            </button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-medium text-gray-700 mb-4">🛏️ Rawat Inap</h4>
+                            <div class="relative h-80">
+                                <canvas id="billingRanapComparisonChart"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-medium text-gray-700 mb-4">🚶 Rawat Jalan</h4>
+                            <div class="relative h-80">
+                                <canvas id="billingRalanComparisonChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Patient Comparison -->
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800">👥 Perbandingan Jumlah Pasien Bulanan</h3>
+                        <div class="flex gap-2">
+                            <button id="patientComparisonChartToggle" class="px-3 py-1 bg-purple-100 text-purple-700 rounded-lg text-sm hover:bg-purple-200 transition-colors">
+                                📊 Bar Chart
+                            </button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-medium text-gray-700 mb-4">🛏️ Rawat Inap</h4>
+                            <div class="relative h-80">
+                                <canvas id="patientRanapComparisonChart"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-medium text-gray-700 mb-4">🚶 Rawat Jalan</h4>
+                            <div class="relative h-80">
+                                <canvas id="patientRalanComparisonChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Combined Service Comparison -->
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800">🏥 Perbandingan Semua Jenis Pelayanan (Gabungan)</h3>
+                        <div class="flex gap-2">
+                            <button id="combinedComparisonChartToggle" class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-lg text-sm hover:bg-indigo-200 transition-colors">
+                                📈 Line Chart
+                            </button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div>
+                            <h4 class="text-lg font-medium text-gray-700 mb-4">💰 Total Klaim</h4>
+                            <div class="relative h-80">
+                                <canvas id="combinedKlaimComparisonChart"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-medium text-gray-700 mb-4">💵 Total Billing</h4>
+                            <div class="relative h-80">
+                                <canvas id="combinedBillingComparisonChart"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-medium text-gray-700 mb-4">👥 Total Pasien</h4>
+                            <div class="relative h-80">
+                                <canvas id="combinedPatientComparisonChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comparison Tables -->
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6">📋 Tabel Perbandingan Detail</h3>
+                    
+                    <!-- Klaim Comparison Table -->
+                    <div class="mb-8">
+                        <h4 class="text-lg font-medium text-gray-700 mb-4">💰 Perbandingan Klaim Bulanan</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-blue-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left font-medium text-gray-700">Bulan</th>
+                                        <th class="px-4 py-3 text-center font-medium text-blue-700" id="klaimPrimaryYearHeader">Rawat Inap 2025</th>
+                                        <th class="px-4 py-3 text-center font-medium text-blue-600" id="klaimComparisonYearHeader">Rawat Inap 2024</th>
+                                        <th class="px-4 py-3 text-center font-medium text-blue-500">Selisih RI</th>
+                                        <th class="px-4 py-3 text-center font-medium text-green-700" id="klaimRalanPrimaryYearHeader">Rawat Jalan 2025</th>
+                                        <th class="px-4 py-3 text-center font-medium text-green-600" id="klaimRalanComparisonYearHeader">Rawat Jalan 2024</th>
+                                        <th class="px-4 py-3 text-center font-medium text-green-500">Selisih RJ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="klaimComparisonTable" class="divide-y divide-gray-200">
+                                </tbody>
+                                <tfoot class="bg-blue-100 border-t-2 border-blue-200">
+                                    <tr class="font-bold text-blue-900">
+                                        <td class="px-4 py-3">TOTAL</td>
+                                        <td class="px-4 py-3 text-center" id="klaimRanapPrimaryTotal">Rp 0</td>
+                                        <td class="px-4 py-3 text-center" id="klaimRanapComparisonTotal">Rp 0</td>
+                                        <td class="px-4 py-3 text-center" id="klaimRanapDifferenceTotal">Rp 0</td>
+                                        <td class="px-4 py-3 text-center" id="klaimRalanPrimaryTotal">Rp 0</td>
+                                        <td class="px-4 py-3 text-center" id="klaimRalanComparisonTotal">Rp 0</td>
+                                        <td class="px-4 py-3 text-center" id="klaimRalanDifferenceTotal">Rp 0</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Billing Comparison Table -->
+                    <div class="mb-8">
+                        <h4 class="text-lg font-medium text-gray-700 mb-4">💵 Perbandingan Billing Bulanan</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-green-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left font-medium text-gray-700">Bulan</th>
+                                        <th class="px-4 py-3 text-center font-medium text-green-700" id="billingPrimaryYearHeader">Rawat Inap 2025</th>
+                                        <th class="px-4 py-3 text-center font-medium text-green-600" id="billingComparisonYearHeader">Rawat Inap 2024</th>
+                                        <th class="px-4 py-3 text-center font-medium text-green-500">Selisih RI</th>
+                                        <th class="px-4 py-3 text-center font-medium text-blue-700" id="billingRalanPrimaryYearHeader">Rawat Jalan 2025</th>
+                                        <th class="px-4 py-3 text-center font-medium text-blue-600" id="billingRalanComparisonYearHeader">Rawat Jalan 2024</th>
+                                        <th class="px-4 py-3 text-center font-medium text-blue-500">Selisih RJ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="billingComparisonTable" class="divide-y divide-gray-200">
+                                </tbody>
+                                <tfoot class="bg-green-100 border-t-2 border-green-200">
+                                    <tr class="font-bold text-green-900">
+                                        <td class="px-4 py-3">TOTAL</td>
+                                        <td class="px-4 py-3 text-center" id="billingRanapPrimaryTotal">Rp 0</td>
+                                        <td class="px-4 py-3 text-center" id="billingRanapComparisonTotal">Rp 0</td>
+                                        <td class="px-4 py-3 text-center" id="billingRanapDifferenceTotal">Rp 0</td>
+                                        <td class="px-4 py-3 text-center" id="billingRalanPrimaryTotal">Rp 0</td>
+                                        <td class="px-4 py-3 text-center" id="billingRalanComparisonTotal">Rp 0</td>
+                                        <td class="px-4 py-3 text-center" id="billingRalanDifferenceTotal">Rp 0</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Patient Comparison Table -->
+                    <div>
+                        <h4 class="text-lg font-medium text-gray-700 mb-4">👥 Perbandingan Jumlah Pasien Bulanan</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-purple-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left font-medium text-gray-700">Bulan</th>
+                                        <th class="px-4 py-3 text-center font-medium text-purple-700" id="patientPrimaryYearHeader">Rawat Inap 2025</th>
+                                        <th class="px-4 py-3 text-center font-medium text-purple-600" id="patientComparisonYearHeader">Rawat Inap 2024</th>
+                                        <th class="px-4 py-3 text-center font-medium text-purple-500">Selisih RI</th>
+                                        <th class="px-4 py-3 text-center font-medium text-orange-700" id="patientRalanPrimaryYearHeader">Rawat Jalan 2025</th>
+                                        <th class="px-4 py-3 text-center font-medium text-orange-600" id="patientRalanComparisonYearHeader">Rawat Jalan 2024</th>
+                                        <th class="px-4 py-3 text-center font-medium text-orange-500">Selisih RJ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="patientComparisonTable" class="divide-y divide-gray-200">
+                                </tbody>
+                                <tfoot class="bg-purple-100 border-t-2 border-purple-200">
+                                    <tr class="font-bold text-purple-900">
+                                        <td class="px-4 py-3">TOTAL</td>
+                                        <td class="px-4 py-3 text-center" id="patientRanapPrimaryTotal">0</td>
+                                        <td class="px-4 py-3 text-center" id="patientRanapComparisonTotal">0</td>
+                                        <td class="px-4 py-3 text-center" id="patientRanapDifferenceTotal">0</td>
+                                        <td class="px-4 py-3 text-center" id="patientRalanPrimaryTotal">0</td>
+                                        <td class="px-4 py-3 text-center" id="patientRalanComparisonTotal">0</td>
+                                        <td class="px-4 py-3 text-center" id="patientRalanDifferenceTotal">0</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -762,6 +1169,23 @@ function testFunction() {
         let currentChartType = 'line';
         let currentPatientChartType = 'bar';
         
+        // Comparison variables
+        let primaryYearData = [];
+        let comparisonYearData = [];
+        let klaimRanapComparisonChart = null;
+        let klaimRalanComparisonChart = null;
+        let billingRanapComparisonChart = null;
+        let billingRalanComparisonChart = null;
+        let patientRanapComparisonChart = null;
+        let patientRalanComparisonChart = null;
+        let combinedKlaimComparisonChart = null;
+        let combinedBillingComparisonChart = null;
+        let combinedPatientComparisonChart = null;
+        let currentKlaimComparisonChartType = 'line';
+        let currentBillingComparisonChartType = 'line';
+        let currentPatientComparisonChartType = 'bar';
+        let currentCombinedComparisonChartType = 'line';
+        
 
 
         // Parse Indonesian date format (dd/mm/yyyy)
@@ -881,6 +1305,31 @@ function testFunction() {
 
         // Configuration for Google Sheets
         const SPREADSHEET_CONFIG = {
+            2030: {
+                id: '',
+                sheetName: 'rekap_bliing',
+                gid: '0'
+            },
+            2029: {
+                id: '',
+                sheetName: 'rekap_bliing',
+                gid: '0'
+            },
+            2028: {
+                id: '',
+                sheetName: 'rekap_bliing',
+                gid: '0'
+            },
+            2027: {
+                id: '',
+                sheetName: 'rekap_bliing',
+                gid: '0'
+            },
+            2026: {
+                id: '',
+                sheetName: 'rekap_bliing',
+                gid: '0'
+            },
             2025: {
                 id: '2PACX-1vTxt2W5FP7inmzmBNBPKVnLPhnLt_EOwgJ866RNLjy4U9SpXUI35PBTAFQxlclLW1uU47JDfd0o3cIw',
                 sheetName: 'rekap_bliing',
@@ -2000,6 +2449,563 @@ function testFunction() {
             updateMonthlyTable(); // This will recreate the chart
         }
 
+        // Comparison chart toggles
+        function toggleKlaimComparisonChartType() {
+            currentKlaimComparisonChartType = currentKlaimComparisonChartType === 'line' ? 'bar' : 'line';
+            const button = document.getElementById('klaimComparisonChartToggle');
+            button.textContent = currentKlaimComparisonChartType === 'line' ? '📈 Line Chart' : '📊 Bar Chart';
+            updateComparisonCharts();
+        }
+
+        function toggleBillingComparisonChartType() {
+            currentBillingComparisonChartType = currentBillingComparisonChartType === 'line' ? 'bar' : 'line';
+            const button = document.getElementById('billingComparisonChartToggle');
+            button.textContent = currentBillingComparisonChartType === 'line' ? '📈 Line Chart' : '📊 Bar Chart';
+            updateComparisonCharts();
+        }
+
+        function togglePatientComparisonChartType() {
+            currentPatientComparisonChartType = currentPatientComparisonChartType === 'bar' ? 'line' : 'bar';
+            const button = document.getElementById('patientComparisonChartToggle');
+            button.textContent = currentPatientComparisonChartType === 'bar' ? '📊 Bar Chart' : '📈 Line Chart';
+            updateComparisonCharts();
+        }
+
+        function toggleCombinedComparisonChartType() {
+            currentCombinedComparisonChartType = currentCombinedComparisonChartType === 'line' ? 'bar' : 'line';
+            const button = document.getElementById('combinedComparisonChartToggle');
+            button.textContent = currentCombinedComparisonChartType === 'line' ? '📈 Line Chart' : '📊 Bar Chart';
+            updateComparisonCharts();
+        }
+
+        // Load comparison data
+        async function loadComparisonData() {
+            const primaryYear = parseInt(document.getElementById('primaryYear').value);
+            const comparisonYear = parseInt(document.getElementById('comparisonYear').value);
+            
+            if (primaryYear === comparisonYear) {
+                alert('Pilih tahun yang berbeda untuk perbandingan!');
+                return;
+            }
+
+            const loadBtn = document.getElementById('loadComparisonData');
+            const originalText = loadBtn.innerHTML;
+            loadBtn.innerHTML = '⏳ Memuat Data...';
+            loadBtn.disabled = true;
+
+            try {
+                // Update status
+                document.getElementById('comparisonStatus').innerHTML = `⏳ Memuat data tahun ${primaryYear} dan ${comparisonYear}...`;
+
+                // Load primary year data
+                console.log('Loading primary year data:', primaryYear);
+                const primaryConfig = SPREADSHEET_CONFIG[primaryYear];
+                if (!primaryConfig || !primaryConfig.id) {
+                    throw new Error(`Konfigurasi untuk tahun ${primaryYear} tidak ditemukan`);
+                }
+
+                let primaryData = [];
+                try {
+                    if (primaryConfig.appsScriptUrl) {
+                        const response = await fetch(primaryConfig.appsScriptUrl + '?year=' + primaryYear + '&cb=' + Date.now());
+                        if (response.ok) {
+                            const result = await response.json();
+                            if (result.success) {
+                                primaryData = result.rawData;
+                            } else {
+                                throw new Error('Apps Script error');
+                            }
+                        } else {
+                            throw new Error('Apps Script failed');
+                        }
+                    } else {
+                        throw new Error('Using CSV fallback');
+                    }
+                } catch (error) {
+                    console.log('Fallback to CSV for primary year');
+                    const url = generateSheetsURL(primaryYear) + '&cb=' + Date.now();
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`Failed to load ${primaryYear} data`);
+                    const csvText = await response.text();
+                    primaryData = parseCSV(csvText);
+                }
+
+                // Load comparison year data
+                console.log('Loading comparison year data:', comparisonYear);
+                const comparisonConfig = SPREADSHEET_CONFIG[comparisonYear];
+                if (!comparisonConfig || !comparisonConfig.id) {
+                    throw new Error(`Konfigurasi untuk tahun ${comparisonYear} tidak ditemukan`);
+                }
+
+                let comparisonData = [];
+                try {
+                    if (comparisonConfig.appsScriptUrl) {
+                        const response = await fetch(comparisonConfig.appsScriptUrl + '?year=' + comparisonYear + '&cb=' + Date.now());
+                        if (response.ok) {
+                            const result = await response.json();
+                            if (result.success) {
+                                comparisonData = result.rawData;
+                            } else {
+                                throw new Error('Apps Script error');
+                            }
+                        } else {
+                            throw new Error('Apps Script failed');
+                        }
+                    } else {
+                        throw new Error('Using CSV fallback');
+                    }
+                } catch (error) {
+                    console.log('Fallback to CSV for comparison year');
+                    const url = generateSheetsURL(comparisonYear) + '&cb=' + Date.now();
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`Failed to load ${comparisonYear} data`);
+                    const csvText = await response.text();
+                    comparisonData = parseCSV(csvText);
+                }
+
+                // Store data globally
+                primaryYearData = primaryData;
+                comparisonYearData = comparisonData;
+
+                console.log('Primary year data loaded:', primaryYearData.length, 'records');
+                console.log('Comparison year data loaded:', comparisonYearData.length, 'records');
+
+                // Update comparison displays
+                updateComparisonCharts();
+                updateComparisonTables();
+
+                // Update status
+                document.getElementById('comparisonStatus').innerHTML = `✅ Data berhasil dimuat: ${primaryYear} (${primaryYearData.length} records) vs ${comparisonYear} (${comparisonYearData.length} records)`;
+
+            } catch (error) {
+                console.error('Error loading comparison data:', error);
+                document.getElementById('comparisonStatus').innerHTML = `❌ Gagal memuat data: ${error.message}`;
+                alert(`Gagal memuat data perbandingan:\n\n${error.message}\n\nPastikan konfigurasi Google Sheets sudah benar untuk kedua tahun.`);
+            } finally {
+                loadBtn.innerHTML = originalText;
+                loadBtn.disabled = false;
+            }
+        }
+
+        // Process monthly data for comparison
+        function processMonthlyComparisonData(data) {
+            const monthlyData = {};
+            const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                              'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+            // Initialize all months
+            monthNames.forEach(month => {
+                monthlyData[month] = {
+                    ranap: { klaim: 0, billing: 0, patients: 0 },
+                    ralan: { klaim: 0, billing: 0, patients: 0 }
+                };
+            });
+
+            data.forEach(row => {
+                const dischargeDate = row.Discharge_Date || row.DISCHARGE_DATE || row['Tanggal Keluar'] || row['Discharge Date'];
+                if (dischargeDate) {
+                    const date = parseIndonesianDate(dischargeDate);
+                    if (date && !isNaN(date.getTime())) {
+                        const monthName = monthNames[date.getMonth()];
+                        
+                        const klaim = row.Total_Klaim || row.TOTAL_KLAIM || row['Total Klaim'] || 0;
+                        const billing = row.Total_Billing || row.TOTAL_BILLING || row['Total Billing'] || 0;
+                        const patients = row.Jlh_Pasien || row.JLH_PASIEN || row['Jumlah Pasien'] || row['Jlh Pasien'] || 0;
+                        
+                        // Determine service type
+                        const service = row['JENIS PELAYANAN'] || 
+                                      row['Jenis Pelayanan'] || 
+                                      row.JENIS_PELAYANAN || 
+                                      row['JENIS_PELAYANAN'] ||
+                                      row['Jenis_Pelayanan'] ||
+                                      row.JenisPelayanan ||
+                                      row.jenis_pelayanan ||
+                                      row.SERVICE_TYPE ||
+                                      row.service_type ||
+                                      row.Ruangan ||
+                                      row.RUANGAN ||
+                                      '';
+                        
+                        const serviceStr = service.toString().toLowerCase().trim();
+                        
+                        if (serviceStr.includes('inap') || 
+                            serviceStr.includes('ranap') ||
+                            serviceStr.includes('ri ') ||
+                            serviceStr.includes('rawat inap') ||
+                            (serviceStr.includes('ruang') && !serviceStr.includes('jalan')) ||
+                            serviceStr.includes('ward') ||
+                            serviceStr.includes('bangsal')) {
+                            // Rawat Inap
+                            monthlyData[monthName].ranap.klaim += klaim;
+                            monthlyData[monthName].ranap.billing += billing;
+                            monthlyData[monthName].ranap.patients += patients;
+                        } else {
+                            // Rawat Jalan
+                            monthlyData[monthName].ralan.klaim += klaim;
+                            monthlyData[monthName].ralan.billing += billing;
+                            monthlyData[monthName].ralan.patients += patients;
+                        }
+                    }
+                }
+            });
+
+            return monthlyData;
+        }
+
+        // Update comparison charts
+        function updateComparisonCharts() {
+            if (primaryYearData.length === 0 || comparisonYearData.length === 0) {
+                return;
+            }
+
+            const primaryYear = document.getElementById('primaryYear').value;
+            const comparisonYear = document.getElementById('comparisonYear').value;
+
+            const primaryMonthlyData = processMonthlyComparisonData(primaryYearData);
+            const comparisonMonthlyData = processMonthlyComparisonData(comparisonYearData);
+
+            const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                              'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+            // Prepare chart data
+            const labels = monthNames;
+            
+            // Klaim data
+            const primaryKlaimRanap = monthNames.map(month => primaryMonthlyData[month].ranap.klaim);
+            const comparisonKlaimRanap = monthNames.map(month => comparisonMonthlyData[month].ranap.klaim);
+            const primaryKlaimRalan = monthNames.map(month => primaryMonthlyData[month].ralan.klaim);
+            const comparisonKlaimRalan = monthNames.map(month => comparisonMonthlyData[month].ralan.klaim);
+
+            // Billing data
+            const primaryBillingRanap = monthNames.map(month => primaryMonthlyData[month].ranap.billing);
+            const comparisonBillingRanap = monthNames.map(month => comparisonMonthlyData[month].ranap.billing);
+            const primaryBillingRalan = monthNames.map(month => primaryMonthlyData[month].ralan.billing);
+            const comparisonBillingRalan = monthNames.map(month => comparisonMonthlyData[month].ralan.billing);
+
+            // Patient data
+            const primaryPatientsRanap = monthNames.map(month => primaryMonthlyData[month].ranap.patients);
+            const comparisonPatientsRanap = monthNames.map(month => comparisonMonthlyData[month].ranap.patients);
+            const primaryPatientsRalan = monthNames.map(month => primaryMonthlyData[month].ralan.patients);
+            const comparisonPatientsRalan = monthNames.map(month => comparisonMonthlyData[month].ralan.patients);
+
+            // Update Klaim Ranap Chart
+            updateComparisonChart('klaimRanapComparisonChart', klaimRanapComparisonChart, labels, 
+                [
+                    { label: `Rawat Inap ${primaryYear}`, data: primaryKlaimRanap, color: '#3b82f6' },
+                    { label: `Rawat Inap ${comparisonYear}`, data: comparisonKlaimRanap, color: '#93c5fd' }
+                ], 
+                currentKlaimComparisonChartType, 'Klaim Rawat Inap');
+
+            // Update Klaim Ralan Chart
+            updateComparisonChart('klaimRalanComparisonChart', klaimRalanComparisonChart, labels,
+                [
+                    { label: `Rawat Jalan ${primaryYear}`, data: primaryKlaimRalan, color: '#10b981' },
+                    { label: `Rawat Jalan ${comparisonYear}`, data: comparisonKlaimRalan, color: '#86efac' }
+                ],
+                currentKlaimComparisonChartType, 'Klaim Rawat Jalan');
+
+            // Update Billing Ranap Chart
+            updateComparisonChart('billingRanapComparisonChart', billingRanapComparisonChart, labels,
+                [
+                    { label: `Rawat Inap ${primaryYear}`, data: primaryBillingRanap, color: '#10b981' },
+                    { label: `Rawat Inap ${comparisonYear}`, data: comparisonBillingRanap, color: '#86efac' }
+                ],
+                currentBillingComparisonChartType, 'Billing Rawat Inap');
+
+            // Update Billing Ralan Chart
+            updateComparisonChart('billingRalanComparisonChart', billingRalanComparisonChart, labels,
+                [
+                    { label: `Rawat Jalan ${primaryYear}`, data: primaryBillingRalan, color: '#3b82f6' },
+                    { label: `Rawat Jalan ${comparisonYear}`, data: comparisonBillingRalan, color: '#93c5fd' }
+                ],
+                currentBillingComparisonChartType, 'Billing Rawat Jalan');
+
+            // Update Patient Ranap Chart
+            updateComparisonChart('patientRanapComparisonChart', patientRanapComparisonChart, labels,
+                [
+                    { label: `Rawat Inap ${primaryYear}`, data: primaryPatientsRanap, color: '#8b5cf6' },
+                    { label: `Rawat Inap ${comparisonYear}`, data: comparisonPatientsRanap, color: '#c4b5fd' }
+                ],
+                currentPatientComparisonChartType, 'Pasien Rawat Inap');
+
+            // Update Patient Ralan Chart
+            updateComparisonChart('patientRalanComparisonChart', patientRalanComparisonChart, labels,
+                [
+                    { label: `Rawat Jalan ${primaryYear}`, data: primaryPatientsRalan, color: '#f97316' },
+                    { label: `Rawat Jalan ${comparisonYear}`, data: comparisonPatientsRalan, color: '#fdba74' }
+                ],
+                currentPatientComparisonChartType, 'Pasien Rawat Jalan');
+
+            // Combined data (total of both services)
+            const primaryTotalKlaim = monthNames.map(month => 
+                primaryMonthlyData[month].ranap.klaim + primaryMonthlyData[month].ralan.klaim
+            );
+            const comparisonTotalKlaim = monthNames.map(month => 
+                comparisonMonthlyData[month].ranap.klaim + comparisonMonthlyData[month].ralan.klaim
+            );
+            const primaryTotalBilling = monthNames.map(month => 
+                primaryMonthlyData[month].ranap.billing + primaryMonthlyData[month].ralan.billing
+            );
+            const comparisonTotalBilling = monthNames.map(month => 
+                comparisonMonthlyData[month].ranap.billing + comparisonMonthlyData[month].ralan.billing
+            );
+            const primaryTotalPatients = monthNames.map(month => 
+                primaryMonthlyData[month].ranap.patients + primaryMonthlyData[month].ralan.patients
+            );
+            const comparisonTotalPatients = monthNames.map(month => 
+                comparisonMonthlyData[month].ranap.patients + comparisonMonthlyData[month].ralan.patients
+            );
+
+            // Update Combined Charts
+            updateComparisonChart('combinedKlaimComparisonChart', combinedKlaimComparisonChart, labels,
+                [
+                    { label: `Total Klaim ${primaryYear}`, data: primaryTotalKlaim, color: '#6366f1' },
+                    { label: `Total Klaim ${comparisonYear}`, data: comparisonTotalKlaim, color: '#a5b4fc' }
+                ],
+                currentCombinedComparisonChartType, 'Total Klaim Semua Pelayanan');
+
+            updateComparisonChart('combinedBillingComparisonChart', combinedBillingComparisonChart, labels,
+                [
+                    { label: `Total Billing ${primaryYear}`, data: primaryTotalBilling, color: '#059669' },
+                    { label: `Total Billing ${comparisonYear}`, data: comparisonTotalBilling, color: '#6ee7b7' }
+                ],
+                currentCombinedComparisonChartType, 'Total Billing Semua Pelayanan');
+
+            updateComparisonChart('combinedPatientComparisonChart', combinedPatientComparisonChart, labels,
+                [
+                    { label: `Total Pasien ${primaryYear}`, data: primaryTotalPatients, color: '#dc2626' },
+                    { label: `Total Pasien ${comparisonYear}`, data: comparisonTotalPatients, color: '#fca5a5' }
+                ],
+                currentCombinedComparisonChartType, 'Total Pasien Semua Pelayanan');
+        }
+
+        // Generic function to update comparison charts
+        function updateComparisonChart(canvasId, chartVariable, labels, datasets, chartType, title) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            
+            if (chartVariable) {
+                chartVariable.destroy();
+            }
+
+            const config = {
+                type: chartType,
+                data: {
+                    labels: labels,
+                    datasets: datasets.map(dataset => ({
+                        label: dataset.label,
+                        data: dataset.data,
+                        borderColor: dataset.color,
+                        backgroundColor: chartType === 'bar' ? dataset.color : dataset.color + '20',
+                        borderWidth: 2,
+                        fill: chartType === 'line',
+                        tension: 0.4
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: title,
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (title.includes('Pasien')) {
+                                        return context.dataset.label + ': ' + context.parsed.y.toLocaleString('id-ID') + ' pasien';
+                                    } else {
+                                        return context.dataset.label + ': ' + formatCurrency(context.parsed.y);
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    if (title.includes('Pasien')) {
+                                        return value.toLocaleString('id-ID');
+                                    } else {
+                                        return 'Rp ' + (value / 1000000).toFixed(0) + 'M';
+                                    }
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            };
+
+            // Update the global chart variable
+            switch(canvasId) {
+                case 'klaimRanapComparisonChart':
+                    klaimRanapComparisonChart = new Chart(ctx, config);
+                    break;
+                case 'klaimRalanComparisonChart':
+                    klaimRalanComparisonChart = new Chart(ctx, config);
+                    break;
+                case 'billingRanapComparisonChart':
+                    billingRanapComparisonChart = new Chart(ctx, config);
+                    break;
+                case 'billingRalanComparisonChart':
+                    billingRalanComparisonChart = new Chart(ctx, config);
+                    break;
+                case 'patientRanapComparisonChart':
+                    patientRanapComparisonChart = new Chart(ctx, config);
+                    break;
+                case 'patientRalanComparisonChart':
+                    patientRalanComparisonChart = new Chart(ctx, config);
+                    break;
+                case 'combinedKlaimComparisonChart':
+                    combinedKlaimComparisonChart = new Chart(ctx, config);
+                    break;
+                case 'combinedBillingComparisonChart':
+                    combinedBillingComparisonChart = new Chart(ctx, config);
+                    break;
+                case 'combinedPatientComparisonChart':
+                    combinedPatientComparisonChart = new Chart(ctx, config);
+                    break;
+            }
+        }
+
+        // Update comparison tables
+        function updateComparisonTables() {
+            if (primaryYearData.length === 0 || comparisonYearData.length === 0) {
+                return;
+            }
+
+            const primaryYear = document.getElementById('primaryYear').value;
+            const comparisonYear = document.getElementById('comparisonYear').value;
+
+            const primaryMonthlyData = processMonthlyComparisonData(primaryYearData);
+            const comparisonMonthlyData = processMonthlyComparisonData(comparisonYearData);
+
+            const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                              'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+            // Update table headers
+            document.getElementById('klaimPrimaryYearHeader').textContent = `Rawat Inap ${primaryYear}`;
+            document.getElementById('klaimComparisonYearHeader').textContent = `Rawat Inap ${comparisonYear}`;
+            document.getElementById('klaimRalanPrimaryYearHeader').textContent = `Rawat Jalan ${primaryYear}`;
+            document.getElementById('klaimRalanComparisonYearHeader').textContent = `Rawat Jalan ${comparisonYear}`;
+
+            document.getElementById('billingPrimaryYearHeader').textContent = `Rawat Inap ${primaryYear}`;
+            document.getElementById('billingComparisonYearHeader').textContent = `Rawat Inap ${comparisonYear}`;
+            document.getElementById('billingRalanPrimaryYearHeader').textContent = `Rawat Jalan ${primaryYear}`;
+            document.getElementById('billingRalanComparisonYearHeader').textContent = `Rawat Jalan ${comparisonYear}`;
+
+            document.getElementById('patientPrimaryYearHeader').textContent = `Rawat Inap ${primaryYear}`;
+            document.getElementById('patientComparisonYearHeader').textContent = `Rawat Inap ${comparisonYear}`;
+            document.getElementById('patientRalanPrimaryYearHeader').textContent = `Rawat Jalan ${primaryYear}`;
+            document.getElementById('patientRalanComparisonYearHeader').textContent = `Rawat Jalan ${comparisonYear}`;
+
+            // Update Klaim table
+            updateComparisonTable('klaimComparisonTable', monthNames, primaryMonthlyData, comparisonMonthlyData, 'klaim');
+            
+            // Update Billing table
+            updateComparisonTable('billingComparisonTable', monthNames, primaryMonthlyData, comparisonMonthlyData, 'billing');
+            
+            // Update Patient table
+            updateComparisonTable('patientComparisonTable', monthNames, primaryMonthlyData, comparisonMonthlyData, 'patients');
+        }
+
+        // Generic function to update comparison tables
+        function updateComparisonTable(tableId, monthNames, primaryData, comparisonData, dataType) {
+            const tbody = document.getElementById(tableId);
+            tbody.innerHTML = '';
+
+            let totalPrimaryRanap = 0, totalComparisonRanap = 0;
+            let totalPrimaryRalan = 0, totalComparisonRalan = 0;
+
+            monthNames.forEach(month => {
+                const primaryRanap = primaryData[month].ranap[dataType];
+                const comparisonRanap = comparisonData[month].ranap[dataType];
+                const primaryRalan = primaryData[month].ralan[dataType];
+                const comparisonRalan = comparisonData[month].ralan[dataType];
+
+                const diffRanap = primaryRanap - comparisonRanap;
+                const diffRalan = primaryRalan - comparisonRalan;
+
+                totalPrimaryRanap += primaryRanap;
+                totalComparisonRanap += comparisonRanap;
+                totalPrimaryRalan += primaryRalan;
+                totalComparisonRalan += comparisonRalan;
+
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                
+                if (dataType === 'patients') {
+                    row.innerHTML = `
+                        <td class="px-4 py-3 text-gray-900 font-medium">${month}</td>
+                        <td class="px-4 py-3 text-center text-gray-900">${primaryRanap.toLocaleString('id-ID')}</td>
+                        <td class="px-4 py-3 text-center text-gray-900">${comparisonRanap.toLocaleString('id-ID')}</td>
+                        <td class="px-4 py-3 text-center font-medium ${diffRanap >= 0 ? 'text-green-600' : 'text-red-600'}">${diffRanap >= 0 ? '+' : ''}${diffRanap.toLocaleString('id-ID')}</td>
+                        <td class="px-4 py-3 text-center text-gray-900">${primaryRalan.toLocaleString('id-ID')}</td>
+                        <td class="px-4 py-3 text-center text-gray-900">${comparisonRalan.toLocaleString('id-ID')}</td>
+                        <td class="px-4 py-3 text-center font-medium ${diffRalan >= 0 ? 'text-green-600' : 'text-red-600'}">${diffRalan >= 0 ? '+' : ''}${diffRalan.toLocaleString('id-ID')}</td>
+                    `;
+                } else {
+                    row.innerHTML = `
+                        <td class="px-4 py-3 text-gray-900 font-medium">${month}</td>
+                        <td class="px-4 py-3 text-center text-gray-900">${formatCurrency(primaryRanap)}</td>
+                        <td class="px-4 py-3 text-center text-gray-900">${formatCurrency(comparisonRanap)}</td>
+                        <td class="px-4 py-3 text-center font-medium ${diffRanap >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(diffRanap)}</td>
+                        <td class="px-4 py-3 text-center text-gray-900">${formatCurrency(primaryRalan)}</td>
+                        <td class="px-4 py-3 text-center text-gray-900">${formatCurrency(comparisonRalan)}</td>
+                        <td class="px-4 py-3 text-center font-medium ${diffRalan >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(diffRalan)}</td>
+                    `;
+                }
+                tbody.appendChild(row);
+            });
+
+            // Update totals
+            const totalDiffRanap = totalPrimaryRanap - totalComparisonRanap;
+            const totalDiffRalan = totalPrimaryRalan - totalComparisonRalan;
+
+            const prefix = tableId.replace('ComparisonTable', '');
+            
+            if (dataType === 'patients') {
+                document.getElementById(`${prefix}RanapPrimaryTotal`).textContent = totalPrimaryRanap.toLocaleString('id-ID');
+                document.getElementById(`${prefix}RanapComparisonTotal`).textContent = totalComparisonRanap.toLocaleString('id-ID');
+                document.getElementById(`${prefix}RanapDifferenceTotal`).textContent = (totalDiffRanap >= 0 ? '+' : '') + totalDiffRanap.toLocaleString('id-ID');
+                document.getElementById(`${prefix}RanapDifferenceTotal`).className = `px-4 py-3 text-center ${totalDiffRanap >= 0 ? 'text-green-600' : 'text-red-600'}`;
+                
+                document.getElementById(`${prefix}RalanPrimaryTotal`).textContent = totalPrimaryRalan.toLocaleString('id-ID');
+                document.getElementById(`${prefix}RalanComparisonTotal`).textContent = totalComparisonRalan.toLocaleString('id-ID');
+                document.getElementById(`${prefix}RalanDifferenceTotal`).textContent = (totalDiffRalan >= 0 ? '+' : '') + totalDiffRalan.toLocaleString('id-ID');
+                document.getElementById(`${prefix}RalanDifferenceTotal`).className = `px-4 py-3 text-center ${totalDiffRalan >= 0 ? 'text-green-600' : 'text-red-600'}`;
+            } else {
+                document.getElementById(`${prefix}RanapPrimaryTotal`).textContent = formatCurrency(totalPrimaryRanap);
+                document.getElementById(`${prefix}RanapComparisonTotal`).textContent = formatCurrency(totalComparisonRanap);
+                document.getElementById(`${prefix}RanapDifferenceTotal`).textContent = formatCurrency(totalDiffRanap);
+                document.getElementById(`${prefix}RanapDifferenceTotal`).className = `px-4 py-3 text-center ${totalDiffRanap >= 0 ? 'text-green-600' : 'text-red-600'}`;
+                
+                document.getElementById(`${prefix}RalanPrimaryTotal`).textContent = formatCurrency(totalPrimaryRalan);
+                document.getElementById(`${prefix}RalanComparisonTotal`).textContent = formatCurrency(totalComparisonRalan);
+                document.getElementById(`${prefix}RalanDifferenceTotal`).textContent = formatCurrency(totalDiffRalan);
+                document.getElementById(`${prefix}RalanDifferenceTotal`).className = `px-4 py-3 text-center ${totalDiffRalan >= 0 ? 'text-green-600' : 'text-red-600'}`;
+            }
+        }
+
 
 
         // Export functions
@@ -2376,6 +3382,31 @@ function testFunction() {
                 Object.assign(SPREADSHEET_CONFIG, config);
                 
                 // Populate form fields
+                document.getElementById('spreadsheetId2030').value = config[2030]?.id || '';
+                document.getElementById('sheetName2030').value = config[2030]?.sheetName || 'rekap_bliing';
+                document.getElementById('gid2030').value = config[2030]?.gid || '';
+                document.getElementById('appsScriptUrl2030').value = config[2030]?.appsScriptUrl || '';
+                
+                document.getElementById('spreadsheetId2029').value = config[2029]?.id || '';
+                document.getElementById('sheetName2029').value = config[2029]?.sheetName || 'rekap_bliing';
+                document.getElementById('gid2029').value = config[2029]?.gid || '';
+                document.getElementById('appsScriptUrl2029').value = config[2029]?.appsScriptUrl || '';
+                
+                document.getElementById('spreadsheetId2028').value = config[2028]?.id || '';
+                document.getElementById('sheetName2028').value = config[2028]?.sheetName || 'rekap_bliing';
+                document.getElementById('gid2028').value = config[2028]?.gid || '';
+                document.getElementById('appsScriptUrl2028').value = config[2028]?.appsScriptUrl || '';
+                
+                document.getElementById('spreadsheetId2027').value = config[2027]?.id || '';
+                document.getElementById('sheetName2027').value = config[2027]?.sheetName || 'rekap_bliing';
+                document.getElementById('gid2027').value = config[2027]?.gid || '';
+                document.getElementById('appsScriptUrl2027').value = config[2027]?.appsScriptUrl || '';
+                
+                document.getElementById('spreadsheetId2026').value = config[2026]?.id || '';
+                document.getElementById('sheetName2026').value = config[2026]?.sheetName || 'rekap_bliing';
+                document.getElementById('gid2026').value = config[2026]?.gid || '';
+                document.getElementById('appsScriptUrl2026').value = config[2026]?.appsScriptUrl || '';
+                
                 document.getElementById('spreadsheetId2025').value = config[2025]?.id || '';
                 document.getElementById('sheetName2025').value = config[2025]?.sheetName || 'rekap_bliing';
                 document.getElementById('gid2025').value = config[2025]?.gid || '';
@@ -2392,6 +3423,36 @@ function testFunction() {
 
         function saveConfigToStorage() {
             const config = {
+                2030: {
+                    id: document.getElementById('spreadsheetId2030').value.trim(),
+                    sheetName: document.getElementById('sheetName2030').value.trim() || 'rekap_bliing',
+                    gid: document.getElementById('gid2030').value.trim(),
+                    appsScriptUrl: document.getElementById('appsScriptUrl2030').value.trim()
+                },
+                2029: {
+                    id: document.getElementById('spreadsheetId2029').value.trim(),
+                    sheetName: document.getElementById('sheetName2029').value.trim() || 'rekap_bliing',
+                    gid: document.getElementById('gid2029').value.trim(),
+                    appsScriptUrl: document.getElementById('appsScriptUrl2029').value.trim()
+                },
+                2028: {
+                    id: document.getElementById('spreadsheetId2028').value.trim(),
+                    sheetName: document.getElementById('sheetName2028').value.trim() || 'rekap_bliing',
+                    gid: document.getElementById('gid2028').value.trim(),
+                    appsScriptUrl: document.getElementById('appsScriptUrl2028').value.trim()
+                },
+                2027: {
+                    id: document.getElementById('spreadsheetId2027').value.trim(),
+                    sheetName: document.getElementById('sheetName2027').value.trim() || 'rekap_bliing',
+                    gid: document.getElementById('gid2027').value.trim(),
+                    appsScriptUrl: document.getElementById('appsScriptUrl2027').value.trim()
+                },
+                2026: {
+                    id: document.getElementById('spreadsheetId2026').value.trim(),
+                    sheetName: document.getElementById('sheetName2026').value.trim() || 'rekap_bliing',
+                    gid: document.getElementById('gid2026').value.trim(),
+                    appsScriptUrl: document.getElementById('appsScriptUrl2026').value.trim()
+                },
                 2025: {
                     id: document.getElementById('spreadsheetId2025').value.trim(),
                     sheetName: document.getElementById('sheetName2025').value.trim() || 'rekap_bliing',
@@ -2406,9 +3467,9 @@ function testFunction() {
                 }
             };
 
-            // Validate required fields
-            if (!config[2025].id || !config[2024].id) {
-                alert('Spreadsheet ID wajib diisi untuk kedua tahun!');
+            // Validate required fields - at least one year must have ID
+            if (!config[2030].id && !config[2029].id && !config[2028].id && !config[2027].id && !config[2026].id && !config[2025].id && !config[2024].id) {
+                alert('Minimal satu tahun harus memiliki Spreadsheet ID!');
                 return false;
             }
 
@@ -2426,6 +3487,31 @@ function testFunction() {
             localStorage.removeItem('hospitalDashboardConfig');
             
             // Reset form fields
+            document.getElementById('spreadsheetId2030').value = '';
+            document.getElementById('sheetName2030').value = 'rekap_bliing';
+            document.getElementById('gid2030').value = '';
+            document.getElementById('appsScriptUrl2030').value = '';
+            
+            document.getElementById('spreadsheetId2029').value = '';
+            document.getElementById('sheetName2029').value = 'rekap_bliing';
+            document.getElementById('gid2029').value = '';
+            document.getElementById('appsScriptUrl2029').value = '';
+            
+            document.getElementById('spreadsheetId2028').value = '';
+            document.getElementById('sheetName2028').value = 'rekap_bliing';
+            document.getElementById('gid2028').value = '';
+            document.getElementById('appsScriptUrl2028').value = '';
+            
+            document.getElementById('spreadsheetId2027').value = '';
+            document.getElementById('sheetName2027').value = 'rekap_bliing';
+            document.getElementById('gid2027').value = '';
+            document.getElementById('appsScriptUrl2027').value = '';
+            
+            document.getElementById('spreadsheetId2026').value = '';
+            document.getElementById('sheetName2026').value = 'rekap_bliing';
+            document.getElementById('gid2026').value = '';
+            document.getElementById('appsScriptUrl2026').value = '';
+            
             document.getElementById('spreadsheetId2025').value = '';
             document.getElementById('sheetName2025').value = 'rekap_bliing';
             document.getElementById('gid2025').value = '';
@@ -2437,6 +3523,11 @@ function testFunction() {
             document.getElementById('appsScriptUrl2024').value = '';
             
             // Reset to default config
+            SPREADSHEET_CONFIG[2030] = { id: '', sheetName: 'rekap_bliing', gid: '', appsScriptUrl: '' };
+            SPREADSHEET_CONFIG[2029] = { id: '', sheetName: 'rekap_bliing', gid: '', appsScriptUrl: '' };
+            SPREADSHEET_CONFIG[2028] = { id: '', sheetName: 'rekap_bliing', gid: '', appsScriptUrl: '' };
+            SPREADSHEET_CONFIG[2027] = { id: '', sheetName: 'rekap_bliing', gid: '', appsScriptUrl: '' };
+            SPREADSHEET_CONFIG[2026] = { id: '', sheetName: 'rekap_bliing', gid: '', appsScriptUrl: '' };
             SPREADSHEET_CONFIG[2025] = { id: '', sheetName: 'rekap_bliing', gid: '', appsScriptUrl: '' };
             SPREADSHEET_CONFIG[2024] = { id: '', sheetName: 'rekap_bliing', gid: '', appsScriptUrl: '' };
             
@@ -2491,9 +3582,9 @@ function testFunction() {
             // Refresh button
             document.getElementById('refreshBtn').addEventListener('click', refreshData);
 
-            // Year toggle
-            document.getElementById('yearToggle').addEventListener('change', function() {
-                currentYear = this.checked ? 2025 : 2024;
+            // Year selector
+            document.getElementById('yearSelect').addEventListener('change', function() {
+                currentYear = parseInt(this.value);
                 document.getElementById('currentYearDisplay').textContent = currentYear;
                 loadData(currentYear);
             });
@@ -2559,6 +3650,15 @@ function testFunction() {
             // Chart toggle buttons
             document.getElementById('chartTypeToggle').addEventListener('click', toggleChartType);
             document.getElementById('patientChartTypeToggle').addEventListener('click', togglePatientChartType);
+            
+            // Comparison chart toggle buttons
+            document.getElementById('klaimComparisonChartToggle').addEventListener('click', toggleKlaimComparisonChartType);
+            document.getElementById('billingComparisonChartToggle').addEventListener('click', toggleBillingComparisonChartType);
+            document.getElementById('patientComparisonChartToggle').addEventListener('click', togglePatientComparisonChartType);
+            document.getElementById('combinedComparisonChartToggle').addEventListener('click', toggleCombinedComparisonChartType);
+            
+            // Comparison data loading
+            document.getElementById('loadComparisonData').addEventListener('click', loadComparisonData);
 
             // Close modal when clicking outside
             document.getElementById('configModal').addEventListener('click', function(e) {
@@ -2613,5 +3713,5 @@ function testFunction() {
             loadData(currentYear);
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96ab387383e7ec6e',t:'MTc1NDQ0ODU2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96ad3b6a6407fe17',t:'MTc1NDQ2OTY1NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
