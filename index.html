@@ -1,0 +1,2617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Billing Analytics Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .gradient-bg { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); }
+        .metric-card { transition: all 0.3s ease; }
+        .metric-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1); }
+        .loading { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .toggle-switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #3b82f6; }
+        input:checked + .slider:before { transform: translateX(26px); }
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <div class="gradient-bg text-white py-6">
+        <div class="max-w-7xl mx-auto px-6">
+            <!-- Top Row: Title and Main Controls -->
+            <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6 mb-6">
+                <div class="flex-shrink-0">
+                    <h1 class="text-3xl lg:text-4xl font-bold mb-2">🏥 Dashboard Monitoring Klaim</h1>
+                    <p class="text-blue-100 text-base lg:text-lg">Analisis Klaim JKN - Sistem Informasi Rumah Sakit</p>
+                </div>
+                
+                <!-- Year Toggle - Prominent Position -->
+                <div class="flex items-center bg-white bg-opacity-15 rounded-xl px-6 py-3 backdrop-blur-sm border border-white border-opacity-20">
+                    <span class="text-sm font-medium mr-4">📅 Tahun Data:</span>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-sm font-medium">2024</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="yearToggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                        <span class="text-sm font-medium">2025</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bottom Row: Status and Action Buttons -->
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                <!-- Left: Last Updated Info -->
+                <div class="flex items-center space-x-4">
+                    <div class="bg-white bg-opacity-10 rounded-lg px-4 py-2 backdrop-blur-sm">
+                        <div class="text-xs text-blue-100 opacity-75">Terakhir diperbarui:</div>
+                        <div id="lastUpdated" class="text-sm font-medium text-white">-</div>
+                    </div>
+                    <div class="bg-white bg-opacity-10 rounded-lg px-4 py-2 backdrop-blur-sm">
+                        <div class="text-xs text-blue-100 opacity-75">Status:</div>
+                        <div class="text-sm font-medium text-green-300">🟢 Online</div>
+                    </div>
+                </div>
+                
+                <!-- Right: Action Buttons -->
+                <div class="flex items-center space-x-3">
+                    <button id="refreshBtn" class="bg-green-500 hover:bg-green-600 px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105">
+                        🔄 Refresh Data
+                    </button>
+                    <button id="configBtn" class="bg-blue-500 hover:bg-blue-600 px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105">
+                        ⚙️ Konfigurasi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuration Modal -->
+    <div id="configModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Konfigurasi Google Sheets</h2>
+                <button id="closeConfig" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            
+            <div class="space-y-6">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-blue-800 mb-2">📋 Cara Setup Google Sheets:</h3>
+                    <ol class="text-sm text-blue-700 space-y-1">
+                        <li>1. Buka Google Sheets Anda</li>
+                        <li>2. Klik "File" → "Share" → "Publish to web"</li>
+                        <li>3. Pilih sheet yang ingin dipublish</li>
+                        <li>4. Pilih format "Comma-separated values (.csv)"</li>
+                        <li>5. Klik "Publish" dan copy link yang diberikan</li>
+                        <li>6. Ambil ID dari URL (bagian setelah /d/ dan sebelum /edit)</li>
+                    </ol>
+                </div>
+
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-green-800 mb-2">⚡ Setup Apps Script (Opsional - untuk loading cepat):</h3>
+                    <ol class="text-sm text-green-700 space-y-1">
+                        <li>1. Buka <a href="https://script.google.com" target="_blank" class="underline">script.google.com</a></li>
+                        <li>2. Klik "New Project" dan beri nama "Hospital Dashboard API"</li>
+                        <li>3. Copy paste kode Apps Script yang disediakan (sudah diperbaiki untuk MIME type error)</li>
+                        <li>4. <strong>PENTING:</strong> Ganti "YOUR_2025_SHEET_ID" dan "YOUR_2024_SHEET_ID" dengan ID sheet Anda</li>
+                        <li>5. Klik "Deploy" → "New deployment" → "Web app"</li>
+                        <li>6. Set "Execute as: Me" dan "Who has access: Anyone"</li>
+                        <li>7. Klik "Deploy" dan copy URL yang diberikan</li>
+                        <li>8. Masukkan URL tersebut ke field "Apps Script URL" di bawah</li>
+                    </ol>
+                    <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                        <p class="text-xs text-yellow-800 font-medium">⚠️ Troubleshooting MIME Type Error:</p>
+                        <ul class="text-xs text-yellow-700 mt-1 space-y-1">
+                            <li>• Pastikan kode Apps Script sudah benar (gunakan kode yang diperbaiki di bawah)</li>
+                            <li>• Setelah deploy, tunggu 1-2 menit sebelum test</li>
+                            <li>• Jika masih error, coba deploy ulang dengan versi baru</li>
+                            <li>• Pastikan akses "Anyone" sudah diset dengan benar</li>
+                        </ul>
+                    </div>
+                    <div class="mt-3 p-3 bg-white rounded border border-green-200">
+                        <p class="text-xs text-green-600 font-medium mb-2">📝 Kode Apps Script:</p>
+                        <pre class="text-xs text-gray-700 bg-gray-50 p-2 rounded overflow-x-auto">// ✅ KODE APPS SCRIPT YANG SUDAH DIPERBAIKI
+function doGet(e) {
+  // Set proper headers untuk menghindari MIME type error
+  const output = ContentService.createTextOutput();
+  output.setMimeType(ContentService.MimeType.JSON);
+  
+  try {
+    const year = e.parameter.year || '2025';
+    
+    // ⚠️ GANTI DENGAN SHEET ID ANDA
+    const spreadsheetId = year === '2025' ? 'YOUR_2025_SHEET_ID' : 'YOUR_2024_SHEET_ID';
+    
+    // Buka spreadsheet dan ambil data
+    const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+    const sheet = spreadsheet.getSheetByName('rekap_bliing');
+    
+    if (!sheet) {
+      throw new Error('Sheet "rekap_bliing" tidak ditemukan');
+    }
+    
+    const range = sheet.getDataRange();
+    const values = range.getValues();
+    
+    if (values.length < 2) {
+      throw new Error('Data tidak ditemukan atau hanya ada header');
+    }
+    
+    const headers = values[0];
+    const dataRows = values.slice(1);
+    
+    // Convert ke format JSON
+    const jsonData = dataRows.map(row => {
+      const obj = {};
+      headers.forEach((header, index) => {
+        obj[header] = row[index] || '';
+      });
+      return obj;
+    });
+    
+    // Pre-calculate summary untuk loading cepat
+    const summary = calculateSummary(jsonData);
+    
+    const result = {
+      success: true,
+      rawData: jsonData,
+      summary: summary,
+      timestamp: new Date().toISOString(),
+      recordCount: jsonData.length
+    };
+    
+    return output.setContent(JSON.stringify(result));
+    
+  } catch (error) {
+    const errorResult = {
+      success: false,
+      error: error.toString(),
+      timestamp: new Date().toISOString()
+    };
+    
+    return output.setContent(JSON.stringify(errorResult));
+  }
+}
+
+function calculateSummary(data) {
+  let totalKlaim = 0, totalBilling = 0, totalPasien = 0;
+  let klaimRanap = 0, klaimRalan = 0;
+  let billingRanap = 0, billingRalan = 0;
+  let pasienRanap = 0, pasienRalan = 0;
+  
+  data.forEach(row => {
+    const klaim = parseFloat(row.TOTAL_KLAIM || row['Total Klaim'] || 0);
+    const billing = parseFloat(row.TOTAL_BILLING || row['Total Billing'] || 0);
+    const pasien = parseInt(row.JLH_PASIEN || row['Jlh Pasien'] || 0);
+    
+    totalKlaim += klaim;
+    totalBilling += billing;
+    totalPasien += pasien;
+    
+    // Klasifikasi berdasarkan jenis pelayanan
+    const service = (row['JENIS PELAYANAN'] || row['Jenis Pelayanan'] || '').toString().toLowerCase();
+    
+    if (service.includes('inap') || service.includes('ranap')) {
+      klaimRanap += klaim;
+      billingRanap += billing;
+      pasienRanap += pasien;
+    } else {
+      klaimRalan += klaim;
+      billingRalan += billing;
+      pasienRalan += pasien;
+    }
+  });
+  
+  return {
+    totals: { 
+      klaim: totalKlaim, 
+      billing: totalBilling, 
+      pasien: totalPasien 
+    },
+    breakdown: { 
+      ranap: { klaim: klaimRanap, billing: billingRanap, pasien: pasienRanap },
+      ralan: { klaim: klaimRalan, billing: billingRalan, pasien: pasienRalan }
+    }
+  };
+}
+
+// 🧪 FUNGSI TEST (opsional)
+function testFunction() {
+  const testResult = doGet({ parameter: { year: '2025' } });
+  console.log(testResult.getContent());
+}</pre>
+                    </div>
+                </div>
+
+                <!-- 2025 Configuration -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-4">Data 2025</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Spreadsheet ID</label>
+                            <input type="text" id="spreadsheetId2025" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="1abc123def456...">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Sheet</label>
+                            <input type="text" id="sheetName2025" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Sheet1" value="rekap_bliing">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">GID (Optional)</label>
+                            <input type="text" id="gid2025" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0">
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-lg">
+                            <label class="block text-sm font-medium text-green-800 mb-2">⚡ Apps Script URL (Opsional - untuk loading cepat)</label>
+                            <input type="text" id="appsScriptUrl2025" class="w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
+                            <p class="text-xs text-green-600 mt-1">Jika diisi, sistem akan menggunakan Apps Script untuk loading data yang lebih cepat</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2024 Configuration -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-4">Data 2024</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Spreadsheet ID</label>
+                            <input type="text" id="spreadsheetId2024" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="1abc123def456...">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Sheet</label>
+                            <input type="text" id="sheetName2024" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Sheet1" value="rekap_bliing">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">GID (Optional)</label>
+                            <input type="text" id="gid2024" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0">
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-lg">
+                            <label class="block text-sm font-medium text-green-800 mb-2">⚡ Apps Script URL (Opsional - untuk loading cepat)</label>
+                            <input type="text" id="appsScriptUrl2024" class="w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
+                            <p class="text-xs text-green-600 mt-1">Jika diisi, sistem akan menggunakan Apps Script untuk loading data yang lebih cepat</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <button id="saveConfig" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                        Simpan & Test Koneksi
+                    </button>
+                    <button id="resetConfig" class="bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors">
+                        Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 text-center">
+            <div class="loading w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading data...</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="w-full px-6 py-6">
+        <!-- Main Scorecard - Always Visible -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                    📊 Ringkasan Data
+                </h2>
+                <div class="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+                    Data Tahun <span class="font-semibold" id="currentYearDisplay">2025</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white rounded-xl p-6 card-shadow metric-card">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex-1">
+                        <p class="text-gray-500 text-sm font-medium">Total Klaim</p>
+                        <p class="text-2xl font-bold text-blue-600" id="totalKlaim">Rp 0</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <span class="text-2xl">📋</span>
+                    </div>
+                </div>
+                <div class="border-t border-gray-100 pt-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs text-gray-500">🛏️ Rawat Inap:</span>
+                        <span class="text-sm font-semibold text-blue-700" id="klaimRanap">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">🚶 Rawat Jalan:</span>
+                        <span class="text-sm font-semibold text-blue-700" id="klaimRalan">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl p-6 card-shadow metric-card">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex-1">
+                        <p class="text-gray-500 text-sm font-medium">Total Billing</p>
+                        <p class="text-2xl font-bold text-green-600" id="totalBilling">Rp 0</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <span class="text-2xl">💰</span>
+                    </div>
+                </div>
+                <div class="border-t border-gray-100 pt-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs text-gray-500">🛏️ Rawat Inap:</span>
+                        <span class="text-sm font-semibold text-green-700" id="billingRanap">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">🚶 Rawat Jalan:</span>
+                        <span class="text-sm font-semibold text-green-700" id="billingRalan">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl p-6 card-shadow metric-card">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex-1">
+                        <p class="text-gray-500 text-sm font-medium">Jumlah Pasien</p>
+                        <p class="text-2xl font-bold text-purple-600" id="totalPasien">0</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <span class="text-2xl">👥</span>
+                    </div>
+                </div>
+                <div class="border-t border-gray-100 pt-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs text-gray-500">🛏️ Rawat Inap:</span>
+                        <span class="text-sm font-semibold text-purple-700" id="pasienRanap">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">🚶 Rawat Jalan:</span>
+                        <span class="text-sm font-semibold text-purple-700" id="pasienRalan">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl p-6 card-shadow metric-card">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex-1">
+                        <p class="text-gray-500 text-sm font-medium">Selisih Klaim - Billing</p>
+                        <p class="text-2xl font-bold" id="selisihTotal">Rp 0</p>
+                    </div>
+                    <div class="bg-orange-100 p-3 rounded-full">
+                        <span class="text-2xl">📊</span>
+                    </div>
+                </div>
+                <div class="border-t border-gray-100 pt-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs text-gray-500">🛏️ Rawat Inap:</span>
+                        <span class="text-sm font-semibold" id="selisihRanap">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">🚶 Rawat Jalan:</span>
+                        <span class="text-sm font-semibold" id="selisihRalan">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters Section - Always Visible -->
+        <div class="bg-white rounded-xl card-shadow mb-8">
+            <div class="p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-800 flex items-center gap-2 mb-1">
+                            🔍 Filter & Pencarian Data
+                        </h3>
+                        <p class="text-sm text-gray-600">Gunakan filter untuk menyaring data sesuai kebutuhan analisis</p>
+                    </div>
+                    <button id="toggleFilters" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 self-start sm:self-center">
+                        <span id="filterToggleText">Sembunyikan Filter</span>
+                        <span id="filterToggleIcon">▲</span>
+                    </button>
+                </div>
+                
+                <div id="filterContent" class="space-y-6">
+                    <!-- Row 1: Date Range -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <h4 class="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                                📅 Rentang Tanggal
+                            </h4>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Tanggal Mulai</label>
+                                    <input type="date" id="startDate" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Tanggal Akhir</label>
+                                    <input type="date" id="endDate" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-green-50 rounded-lg p-4">
+                            <h4 class="text-sm font-semibold text-green-800 mb-3 flex items-center gap-2">
+                                🏥 Jenis Pelayanan
+                            </h4>
+                            <select id="serviceFilter" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                <option value="">Semua Jenis Pelayanan</option>
+                                <option value="Rawat Inap">🛏️ Rawat Inap</option>
+                                <option value="Rawat Jalan">🚶 Rawat Jalan</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Row 2: Month and DPJP Selection -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="bg-purple-50 rounded-lg p-4">
+                            <h4 class="text-sm font-semibold text-purple-800 mb-3 flex items-center gap-2">
+                                📆 Pilih Bulan
+                            </h4>
+                            <div class="border border-purple-200 rounded-lg bg-white">
+                                <div class="p-3 border-b border-purple-200">
+                                    <label class="flex items-center text-sm font-medium text-purple-700 hover:text-purple-800 cursor-pointer">
+                                        <input type="checkbox" id="selectAllMonths" class="mr-2 rounded text-purple-600 focus:ring-purple-500">
+                                        ✅ Pilih Semua Bulan
+                                    </label>
+                                </div>
+                                <div class="p-3 max-h-40 overflow-y-auto">
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <label class="flex items-center text-sm hover:bg-purple-50 p-1 rounded cursor-pointer"><input type="checkbox" class="month-checkbox mr-2 rounded text-purple-600" value="01"> 🌟 Januari</label>
+                                        <label class="flex items-center text-sm hover:bg-purple-50 p-1 rounded cursor-pointer"><input type="checkbox" class="month-checkbox mr-2 rounded text-purple-600" value="02"> 💝 Februari</label>
+                                        <label class="flex items-center text-sm hover:bg-purple-50 p-1 rounded cursor-pointer"><input type="checkbox" class="month-checkbox mr-2 rounded text-purple-600" value="03"> 🌸 Maret</label>
+                                        <label class="flex items-center text-sm hover:bg-purple-50 p-1 rounded cursor-pointer"><input type="checkbox" class="month-checkbox mr-2 rounded text-purple-600" value="04"> 🌷 April</label>
+                                        <label class="flex items-center text-sm hover:bg-purple-50 p-1 rounded cursor-pointer"><input type="checkbox" class="month-checkbox mr-2 rounded text-purple-600" value="05"> 🌺 Mei</label>
+                                        <label class="flex items-center text-sm hover:bg-purple-50 p-1 rounded cursor-pointer"><input type="checkbox" class="month-checkbox mr-2 rounded text-purple-600" value="06"> ☀️ Juni</label>
+                                        <label class="flex items-center text-sm hover:bg-purple-50 p-1 rounded cursor-pointer"><input type="checkbox" class="month-checkbox mr-2 rounded text-purple-600" value="07"> 🏖️ Juli</label>
+                                        <label class="flex items-center text-sm hover:bg-purple-50 p-1 rounded cursor-pointer"><input type="checkbox" class="month-checkbox mr-2 rounded text-purple-600" value="08"> 🌻 Agustus</label>
+                                        <label class="flex items-center text-sm hover:bg-purple-50 p-1 rounded cursor-pointer"><input type="checkbox" class="month-checkbox mr-2 rounded text-purple-600" value="09"> 🍂 September</label>
+                                        <label class="flex items-center text-sm hover:bg-purple-50 p-1 rounded cursor-pointer"><input type="checkbox" class="month-checkbox mr-2 rounded text-purple-600" value="10"> 🎃 Oktober</label>
+                                        <label class="flex items-center text-sm hover:bg-purple-50 p-1 rounded cursor-pointer"><input type="checkbox" class="month-checkbox mr-2 rounded text-purple-600" value="11"> 🦃 November</label>
+                                        <label class="flex items-center text-sm hover:bg-purple-50 p-1 rounded cursor-pointer"><input type="checkbox" class="month-checkbox mr-2 rounded text-purple-600" value="12"> 🎄 Desember</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-orange-50 rounded-lg p-4">
+                            <h4 class="text-sm font-semibold text-orange-800 mb-3 flex items-center gap-2">
+                                👨‍⚕️ Pilih DPJP
+                            </h4>
+                            <div class="border border-orange-200 rounded-lg bg-white">
+                                <div class="p-3 border-b border-orange-200">
+                                    <input type="text" id="dpjpSearch" placeholder="🔍 Cari nama DPJP..." class="w-full px-3 py-2 text-sm border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent mb-2">
+                                    <label class="flex items-center text-sm font-medium text-orange-700 hover:text-orange-800 cursor-pointer">
+                                        <input type="checkbox" id="selectAllDPJP" class="mr-2 rounded text-orange-600 focus:ring-orange-500">
+                                        ✅ Pilih Semua DPJP
+                                    </label>
+                                </div>
+                                <div class="p-3 max-h-40 overflow-y-auto">
+                                    <div id="dpjpCheckboxContainer" class="space-y-1">
+                                        <!-- DPJP checkboxes will be populated dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Filter Action Buttons -->
+                    <div class="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
+                        <button id="applyFilters" class="flex-1 min-w-[120px] px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-medium flex items-center justify-center gap-2 shadow-lg">
+                            ✨ Terapkan Filter
+                        </button>
+                        <button id="resetFilters" class="flex-1 min-w-[120px] px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-medium flex items-center justify-center gap-2 shadow-lg">
+                            🔄 Reset Filter
+                        </button>
+                        <div class="flex-1 min-w-[120px] flex items-center justify-center text-sm text-gray-600 bg-gray-50 rounded-lg px-4 py-3">
+                            <span id="filterStatus">📊 Menampilkan semua data</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="bg-white rounded-xl card-shadow mb-8">
+            <div class="px-6 pt-4 pb-2">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">📋 Menu Analisis</h3>
+            </div>
+            <div class="border-b border-gray-200">
+                <nav class="flex space-x-8 px-6" aria-label="Tabs">
+                    <button class="tab-button active py-4 px-2 border-b-2 border-blue-500 font-medium text-sm text-blue-600 flex items-center gap-2" data-tab="overview">
+                        📊 Overview
+                    </button>
+                    <button class="tab-button py-4 px-2 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 flex items-center gap-2" data-tab="analytics">
+                        📈 Analytics
+                    </button>
+                    <button class="tab-button py-4 px-2 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 flex items-center gap-2" data-tab="reports">
+                        📋 Reports
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <!-- Overview Tab -->
+        <div id="overview-tab" class="tab-content">
+            <!-- Category Cards -->
+            <div class="bg-white rounded-xl p-6 card-shadow mb-8">
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">Klasifikasi Billing</h3>
+                <div class="category-grid" id="categoryCards">
+                    <!-- Category cards will be populated here -->
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Klaim vs Billing Chart -->
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800">📊 Trend Klaim vs Billing Bulanan</h3>
+                        <div class="flex gap-2">
+                            <button id="chartTypeToggle" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors">
+                                📈 Line Chart
+                            </button>
+                        </div>
+                    </div>
+                    <div class="relative h-80">
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Patient Count Chart -->
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800">👥 Jumlah Pasien Bulanan</h3>
+                        <div class="flex gap-2">
+                            <button id="patientChartTypeToggle" class="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm hover:bg-green-200 transition-colors">
+                                📊 Bar Chart
+                            </button>
+                        </div>
+                    </div>
+                    <div class="relative h-80">
+                        <canvas id="patientChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics-tab" class="tab-content hidden">
+            <!-- Trend Bulanan -->
+            <div class="bg-white rounded-xl p-6 card-shadow mb-8">
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">📈 Trend Klaim dan Billing Bulanan</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left font-medium text-gray-700">Bulan</th>
+                                <th class="px-4 py-3 text-center font-medium text-gray-700">Jumlah Pasien</th>
+                                <th class="px-4 py-3 text-right font-medium text-gray-700">Total Klaim</th>
+                                <th class="px-4 py-3 text-right font-medium text-gray-700">Total Billing</th>
+                                <th class="px-4 py-3 text-right font-medium text-gray-700">Selisih</th>
+                                <th class="px-4 py-3 text-right font-medium text-gray-700">% Selisih</th>
+                            </tr>
+                        </thead>
+                        <tbody id="monthlyTable" class="divide-y divide-gray-200">
+                        </tbody>
+                        <tfoot class="bg-purple-50 border-t-2 border-purple-200">
+                            <tr class="font-bold text-purple-900">
+                                <td class="px-4 py-3">TOTAL</td>
+                                <td class="px-4 py-3 text-center" id="monthlyTotalPatients">0</td>
+                                <td class="px-4 py-3 text-right" id="monthlyTotalKlaim">Rp 0</td>
+                                <td class="px-4 py-3 text-right" id="monthlyTotalBilling">Rp 0</td>
+                                <td class="px-4 py-3 text-right" id="monthlyTotalSelisih">Rp 0</td>
+                                <td class="px-4 py-3 text-right" id="monthlyTotalPercentage">0%</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports-tab" class="tab-content hidden">
+            <div class="space-y-8">
+                <!-- Rekap Per Ruangan -->
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800">🏥 Rekap Per Ruangan</h3>
+                        <div class="flex gap-4">
+                            <input type="text" id="roomSearch" placeholder="Cari ruangan..." class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <select id="roomRowsPerPage" class="px-3 py-2 border border-gray-300 rounded-lg">
+                                <option value="10">10 baris</option>
+                                <option value="25">25 baris</option>
+                                <option value="50">50 baris</option>
+                                <option value="all">Semua</option>
+                            </select>
+                            <button id="exportRoomCSV" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                Export CSV
+                            </button>
+                            <button id="exportRoomXLSX" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                Export XLSX
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-medium text-gray-700">No</th>
+                                    <th class="px-4 py-3 text-left font-medium text-gray-700">Ruangan</th>
+                                    <th class="px-4 py-3 text-center font-medium text-gray-700">Jumlah Pasien</th>
+                                    <th class="px-4 py-3 text-right font-medium text-gray-700">Total Klaim</th>
+                                    <th class="px-4 py-3 text-right font-medium text-gray-700">Total Billing</th>
+                                    <th class="px-4 py-3 text-right font-medium text-gray-700">Selisih</th>
+                                    <th class="px-4 py-3 text-right font-medium text-gray-700">% Selisih</th>
+                                </tr>
+                            </thead>
+                            <tbody id="roomTable" class="divide-y divide-gray-200">
+                            </tbody>
+                            <tfoot class="bg-blue-50 border-t-2 border-blue-200">
+                                <tr class="font-bold text-blue-900">
+                                    <td class="px-4 py-3" colspan="2">TOTAL</td>
+                                    <td class="px-4 py-3 text-center" id="roomTotalPatients">0</td>
+                                    <td class="px-4 py-3 text-right" id="roomTotalKlaim">Rp 0</td>
+                                    <td class="px-4 py-3 text-right" id="roomTotalBilling">Rp 0</td>
+                                    <td class="px-4 py-3 text-right" id="roomTotalSelisih">Rp 0</td>
+                                    <td class="px-4 py-3 text-right" id="roomTotalPercentage">0%</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div id="roomPagination" class="mt-4 flex justify-center">
+                    </div>
+                </div>
+
+                <!-- Rekap Per DPJP -->
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800">👨‍⚕️ Rekap Per DPJP</h3>
+                        <div class="flex gap-4">
+                            <input type="text" id="dpjpSearchTable" placeholder="Cari DPJP..." class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <select id="dpjpRowsPerPage" class="px-3 py-2 border border-gray-300 rounded-lg">
+                                <option value="10">10 baris</option>
+                                <option value="25">25 baris</option>
+                                <option value="50">50 baris</option>
+                                <option value="all">Semua</option>
+                            </select>
+                            <button id="exportDPJPCSV" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                Export CSV
+                            </button>
+                            <button id="exportDPJPXLSX" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                Export XLSX
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-medium text-gray-700">No</th>
+                                    <th class="px-4 py-3 text-left font-medium text-gray-700">DPJP</th>
+                                    <th class="px-4 py-3 text-center font-medium text-gray-700">Jumlah Pasien</th>
+                                    <th class="px-4 py-3 text-right font-medium text-gray-700">Total Klaim</th>
+                                    <th class="px-4 py-3 text-right font-medium text-gray-700">Total Billing</th>
+                                    <th class="px-4 py-3 text-right font-medium text-gray-700">Selisih</th>
+                                    <th class="px-4 py-3 text-right font-medium text-gray-700">% Selisih</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dpjpTable" class="divide-y divide-gray-200">
+                            </tbody>
+                            <tfoot class="bg-green-50 border-t-2 border-green-200">
+                                <tr class="font-bold text-green-900">
+                                    <td class="px-4 py-3" colspan="2">TOTAL</td>
+                                    <td class="px-4 py-3 text-center" id="dpjpTotalPatients">0</td>
+                                    <td class="px-4 py-3 text-right" id="dpjpTotalKlaim">Rp 0</td>
+                                    <td class="px-4 py-3 text-right" id="dpjpTotalBilling">Rp 0</td>
+                                    <td class="px-4 py-3 text-right" id="dpjpTotalSelisih">Rp 0</td>
+                                    <td class="px-4 py-3 text-right" id="dpjpTotalPercentage">0%</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div id="dpjpPagination" class="mt-4 flex justify-center">
+                    </div>
+                </div>
+
+                <!-- Export Data Section -->
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">📊 Export Data</h3>
+                            <p class="text-gray-600">Download data lengkap dalam format CSV atau Excel</p>
+                        </div>
+                        <div class="flex gap-4">
+                            <button id="exportCSV" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+                                📄 Export CSV
+                            </button>
+                            <button id="exportXLSX" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                                📊 Export Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+    </div>
+
+    <script>
+        // Global variables
+        let hospitalData = [];
+        let filteredData = [];
+        let currentYear = 2025;
+        let roomData = [];
+        let dpjpData = [];
+        let currentRoomPage = 1;
+        let currentDPJPPage = 1;
+        let monthlyChart = null;
+        let patientChart = null;
+        let currentChartType = 'line';
+        let currentPatientChartType = 'bar';
+        
+
+
+        // Parse Indonesian date format (dd/mm/yyyy)
+        function parseIndonesianDate(dateString) {
+            if (!dateString) return null;
+            
+            // Handle different date formats
+            const parts = dateString.split(/[\/\-]/);
+            if (parts.length === 3) {
+                // Assume dd/mm/yyyy format
+                const day = parseInt(parts[0]);
+                const month = parseInt(parts[1]) - 1; // Month is 0-indexed
+                const year = parseInt(parts[2]);
+                return new Date(year, month, day);
+            }
+            
+            // Fallback to standard Date parsing
+            return new Date(dateString);
+        }
+        
+        const categories = [
+            'PROSEDUR_NON_BEDAH', 'PROSEDUR_BEDAH', 'KONSULTASI', 'TENAGA_AHLI',
+            'KEPERAWATAN', 'PENUNJANG', 'RADIOLOGI', 'LABORATORIUM',
+            'PELAYANAN_DARAH', 'REHABILITASI', 'KAMAR_AKOMODASI', 'RAWAT_INTENSIF',
+            'OBAT', 'ALKES', 'BMHP', 'SEWA_ALAT', 'OBAT_KRONIS', 'OBAT_KEMO'
+        ];
+
+        // Format currency in Indonesian format
+        function formatCurrency(amount) {
+            if (amount === null || amount === undefined || isNaN(amount)) return 'Rp 0';
+            return 'Rp ' + Math.round(amount).toLocaleString('id-ID');
+        }
+
+        // Parse CSV data with Indonesian format handling
+        function parseCSV(csvText) {
+            const lines = csvText.trim().split('\n');
+            if (lines.length < 2) return [];
+            
+            // Parse headers
+            const headers = parseCSVLine(lines[0]);
+            console.log('Headers found:', headers);
+            
+            const data = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim()) {
+                    const values = parseCSVLine(lines[i]);
+                    const row = {};
+                    
+                    headers.forEach((header, index) => {
+                        const value = values[index] || '';
+                        // Convert numeric fields - check for Indonesian column patterns
+                        if (header && (
+                            header.toLowerCase().includes('total') || 
+                            header.toLowerCase().includes('jlh') || 
+                            header.toLowerCase().includes('los') ||
+                            header.toLowerCase().includes('klaim') ||
+                            header.toLowerCase().includes('billing') ||
+                            header.toLowerCase().includes('prosedur') ||
+                            header.toLowerCase().includes('konsultasi') ||
+                            header.toLowerCase().includes('tenaga') ||
+                            header.toLowerCase().includes('keperawatan') ||
+                            header.toLowerCase().includes('penunjang') ||
+                            header.toLowerCase().includes('radiologi') ||
+                            header.toLowerCase().includes('laboratorium') ||
+                            header.toLowerCase().includes('pelayanan') ||
+                            header.toLowerCase().includes('rehabilitasi') ||
+                            header.toLowerCase().includes('kamar') ||
+                            header.toLowerCase().includes('rawat') ||
+                            header.toLowerCase().includes('obat') ||
+                            header.toLowerCase().includes('alkes') ||
+                            header.toLowerCase().includes('bmhp') ||
+                            header.toLowerCase().includes('sewa')
+                        )) {
+                            // Handle Indonesian number format (dots as thousands separator, comma as decimal)
+                            let numValue = value.toString()
+                                .replace(/[^\d.,-]/g, '') // Remove currency symbols and other chars
+                                .replace(/\./g, '') // Remove thousands separators (dots)
+                                .replace(/,/g, '.'); // Convert decimal comma to dot
+                            row[header] = parseFloat(numValue) || 0;
+                        } else {
+                            row[header] = value.replace(/"/g, ''); // Remove quotes
+                        }
+                    });
+                    
+                    if (Object.keys(row).length > 0) {
+                        data.push(row);
+                    }
+                }
+            }
+            
+            console.log('Parsed data sample:', data.slice(0, 3));
+            return data;
+        }
+
+        // Helper function to parse CSV line with proper quote handling
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            result.push(current.trim());
+            return result;
+        }
+
+        // Configuration for Google Sheets
+        const SPREADSHEET_CONFIG = {
+            2025: {
+                id: '2PACX-1vTxt2W5FP7inmzmBNBPKVnLPhnLt_EOwgJ866RNLjy4U9SpXUI35PBTAFQxlclLW1uU47JDfd0o3cIw',
+                sheetName: 'rekap_bliing',
+                gid: '1870234439'
+            },
+            2024: {
+                id: '2PACX-1vT79QpTxJJuwdSQiETogilFz4OO6KFssukIHXjtbbT9Q78_JkAO3Yh7oId3CcDwm222ri1PKzKST0Sz',
+                sheetName: 'rekap_bliing',
+                gid: '1870234439'
+            }
+        };
+
+        // Status tracking
+        let isDataLoaded = false;
+        let lastLoadTime = null;
+
+        // Generate Google Sheets CSV URL
+        function generateSheetsURL(year) {
+            const config = SPREADSHEET_CONFIG[year];
+            if (!config || !config.id) {
+                throw new Error(`No configuration found for year ${year}`);
+            }
+
+            // Check if it's a published sheet (starts with 2PACX) or regular sheet
+            if (config.id.startsWith('2PACX-')) {
+                // For published sheets, use the published CSV URL format
+                return `https://docs.google.com/spreadsheets/d/e/${config.id}/pub?gid=${config.gid}&single=true&output=csv`;
+            } else {
+                // For regular sheets, use the export format
+                return `https://docs.google.com/spreadsheets/d/${config.id}/export?format=csv&gid=${config.gid}`;
+            }
+        }
+
+        // Update last updated timestamp
+        function updateLastUpdatedTime() {
+            const now = new Date();
+            const options = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: 'Asia/Jakarta'
+            };
+            const formattedTime = now.toLocaleString('id-ID', options);
+            document.getElementById('lastUpdated').textContent = formattedTime + ' WIB';
+        }
+
+        // Refresh data function
+        async function refreshData() {
+            const refreshBtn = document.getElementById('refreshBtn');
+            const originalText = refreshBtn.innerHTML;
+            
+            console.log('🔄 Starting refresh data for year:', currentYear);
+            
+            // Show loading state on button
+            refreshBtn.innerHTML = '⏳ Memuat Ulang...';
+            refreshBtn.disabled = true;
+            refreshBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            refreshBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+            refreshBtn.classList.add('bg-blue-500');
+            
+            try {
+                // Clear existing data first to ensure fresh load
+                console.log('🗑️ Clearing existing data...');
+                hospitalData = [];
+                filteredData = [];
+                
+                // Clear dashboard display
+                document.getElementById('totalKlaim').textContent = 'Rp 0';
+                document.getElementById('totalBilling').textContent = 'Rp 0';
+                document.getElementById('totalPasien').textContent = '0';
+                
+                // Force reload data from Google Sheets
+                console.log('📥 Loading fresh data...');
+                await loadData(currentYear);
+                
+                // Verify data was loaded
+                if (hospitalData.length > 0) {
+                    console.log('✅ Refresh successful! Loaded', hospitalData.length, 'records');
+                    
+                    // Show success feedback
+                    refreshBtn.innerHTML = '✅ Data Diperbarui!';
+                    refreshBtn.classList.remove('bg-blue-500');
+                    refreshBtn.classList.add('bg-green-600');
+                    
+                    // Update last refresh time
+                    updateLastUpdatedTime();
+                    
+                } else {
+                    throw new Error('No data loaded after refresh');
+                }
+                
+            } catch (error) {
+                console.error('❌ Refresh error:', error);
+                
+                // Show error feedback
+                refreshBtn.innerHTML = '❌ Refresh Gagal';
+                refreshBtn.classList.remove('bg-blue-500');
+                refreshBtn.classList.add('bg-red-600');
+                
+                // Show error details
+                alert(`Refresh data gagal:\n\n${error.message}\n\nSilakan periksa:\n1. Koneksi internet\n2. Konfigurasi Google Sheets\n3. Akses ke Google Sheets`);
+            }
+            
+            // Reset button after delay
+            setTimeout(() => {
+                refreshBtn.innerHTML = originalText;
+                refreshBtn.disabled = false;
+                refreshBtn.classList.remove('opacity-75', 'cursor-not-allowed', 'bg-blue-500', 'bg-green-600', 'bg-red-600');
+                refreshBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+            }, 3000);
+        }
+
+        // Load data from Google Sheets with Apps Script optimization
+        async function loadData(year = 2025) {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            loadingIndicator.style.display = 'flex';
+
+            try {
+                // Check if configuration exists for the year
+                const config = SPREADSHEET_CONFIG[year];
+                if (!config || !config.id) {
+                    throw new Error(`Konfigurasi untuk tahun ${year} tidak ditemukan. Silakan klik tombol "Konfigurasi" untuk mengatur Google Sheets ID.`);
+                }
+
+                console.log('🚀 Loading optimized data for year:', year);
+                
+                // Try Apps Script endpoint first (faster, pre-processed data)
+                if (config.appsScriptUrl) {
+                    try {
+                        console.log('📡 Trying Apps Script endpoint...');
+                        const appsScriptUrl = config.appsScriptUrl + '?year=' + year + '&cb=' + Date.now();
+                        
+                        const appsScriptResponse = await fetch(appsScriptUrl, {
+                            method: 'GET',
+                            mode: 'cors',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        
+                        if (appsScriptResponse.ok) {
+                            const contentType = appsScriptResponse.headers.get('content-type');
+                            console.log('📋 Response content-type:', contentType);
+                            
+                            // Check if response is actually JSON
+                            if (contentType && contentType.includes('application/json')) {
+                                const processedData = await appsScriptResponse.json();
+                                console.log('✅ Apps Script data received:', processedData);
+                                
+                                // Check if Apps Script returned success
+                                if (processedData.success && processedData.rawData) {
+                                    // Use pre-processed data from Apps Script
+                                    hospitalData = processedData.rawData;
+                                    filteredData = [...hospitalData];
+                                    
+                                    // Update dashboard with pre-calculated summaries
+                                    if (processedData.summary) {
+                                        updateDashboardWithSummary(processedData.summary);
+                                    } else {
+                                        updateDashboard();
+                                    }
+                                    
+                                    isDataLoaded = true;
+                                    lastLoadTime = new Date();
+                                    updateLastUpdatedTime();
+                                    loadingIndicator.style.display = 'none';
+                                    
+                                    console.log('🎯 Fast loading completed via Apps Script!');
+                                    showSuccessMessage(`⚡ Data dimuat via Apps Script! (${processedData.recordCount} records)`);
+                                    return;
+                                } else {
+                                    throw new Error(processedData.error || 'Apps Script returned error');
+                                }
+                            } else {
+                                throw new Error('Apps Script returned HTML instead of JSON - check deployment settings');
+                            }
+                        } else {
+                            throw new Error(`Apps Script HTTP ${appsScriptResponse.status}: ${appsScriptResponse.statusText}`);
+                        }
+                    } catch (appsScriptError) {
+                        console.log('⚠️ Apps Script failed, falling back to direct CSV:', appsScriptError.message);
+                        
+                        // Show specific error message for MIME type issues
+                        if (appsScriptError.message.includes('HTML') || appsScriptError.message.includes('MIME')) {
+                            console.warn('🚨 MIME Type Error detected - Apps Script may not be properly configured');
+                        }
+                    }
+                }
+
+                // Fallback to direct CSV loading (slower but reliable)
+                console.log('📄 Loading via direct CSV...');
+                const url = generateSheetsURL(year);
+                console.log('Loading data from:', url);
+                
+                // Add cache-busting parameter to ensure fresh data
+                const cacheBustUrl = url + '&cb=' + Date.now();
+                
+                // Try to fetch data with proper error handling
+                const response = await fetch(cacheBustUrl, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'text/csv,text/plain,*/*'
+                    }
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error(`Google Sheet tidak ditemukan (404). Pastikan:\n1. Sheet ID benar\n2. Sheet sudah dipublish ke web\n3. GID sheet benar`);
+                    } else if (response.status === 403) {
+                        throw new Error(`Akses ditolak (403). Pastikan Google Sheet sudah dipublish ke web dan dapat diakses publik.`);
+                    } else {
+                        throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+                    }
+                }
+                
+                const csvText = await response.text();
+                console.log('CSV data received, length:', csvText.length);
+                
+                if (csvText.length < 50) {
+                    throw new Error('Data CSV terlalu pendek atau kosong. Periksa isi Google Sheet.');
+                }
+                
+                // Check if it's an error page or HTML
+                if (csvText.includes('<!DOCTYPE html>') || csvText.includes('<html') || csvText.includes('<HTML')) {
+                    throw new Error('Menerima halaman HTML bukan CSV. Pastikan:\n1. Google Sheet sudah dipublish sebagai CSV\n2. URL akses benar\n3. Sheet tidak private');
+                }
+                
+                // Check for Google Sheets error messages
+                if (csvText.includes('Sorry, unable to open the file') || csvText.includes('File not found')) {
+                    throw new Error('File Google Sheet tidak dapat dibuka. Periksa Sheet ID dan pastikan sheet dapat diakses publik.');
+                }
+                
+                const newData = parseCSV(csvText);
+                console.log('Parsed hospital data:', newData.length, 'records');
+                
+                if (newData.length === 0) {
+                    throw new Error('Tidak ada data yang berhasil diparse dari CSV. Periksa format data di Google Sheet.');
+                }
+                
+                // Validate data structure
+                const sampleRow = newData[0];
+                const hasRequiredColumns = sampleRow && (
+                    sampleRow.TOTAL_KLAIM || sampleRow['Total Klaim'] || sampleRow.Total_Klaim ||
+                    sampleRow.TOTAL_BILLING || sampleRow['Total Billing'] || sampleRow.Total_Billing
+                );
+                
+                if (!hasRequiredColumns) {
+                    console.warn('Data structure may be incorrect. Sample row:', sampleRow);
+                    console.warn('Available columns:', Object.keys(sampleRow));
+                }
+                
+                // Only update if we have valid data
+                hospitalData = newData;
+                filteredData = [...hospitalData];
+                isDataLoaded = true;
+                lastLoadTime = new Date();
+                
+                updateDashboard();
+                updateLastUpdatedTime();
+                loadingIndicator.style.display = 'none';
+                
+                console.log('✅ Data loaded successfully:', hospitalData.length, 'records for year', year);
+                showSuccessMessage('✅ Data berhasil dimuat!');
+                
+            } catch (error) {
+                console.error('❌ Error loading data:', error);
+                loadingIndicator.style.display = 'none';
+                
+                // Show detailed error message
+                let errorMsg = `❌ Gagal memuat data untuk tahun ${year}:\n\n${error.message}\n\n`;
+                
+                if (error.message.includes('Konfigurasi')) {
+                    errorMsg += '💡 Solusi: Klik tombol "Konfigurasi" untuk mengatur Google Sheets ID.';
+                } else if (error.message.includes('404') || error.message.includes('tidak ditemukan')) {
+                    errorMsg += '💡 Solusi:\n1. Periksa Google Sheets ID\n2. Pastikan sheet sudah dipublish\n3. Periksa GID sheet';
+                } else if (error.message.includes('403') || error.message.includes('ditolak')) {
+                    errorMsg += '💡 Solusi:\n1. Buka Google Sheets\n2. File → Share → Publish to web\n3. Pilih "Anyone on the internet can find and view"';
+                } else {
+                    errorMsg += '💡 Solusi:\n1. Periksa koneksi internet\n2. Pastikan Google Sheets dapat diakses\n3. Coba refresh halaman';
+                }
+                
+                alert(errorMsg);
+                
+                // Show error on refresh button
+                const refreshBtn = document.getElementById('refreshBtn');
+                const originalText = refreshBtn.innerHTML;
+                refreshBtn.innerHTML = '❌ Gagal Memuat Data';
+                refreshBtn.classList.add('bg-red-600');
+                setTimeout(() => {
+                    refreshBtn.innerHTML = originalText;
+                    refreshBtn.classList.remove('bg-red-600');
+                }, 5000);
+                
+                // Only load sample data if no data exists at all
+                if (hospitalData.length === 0) {
+                    console.log('Loading sample data as fallback...');
+                    loadSampleData();
+                }
+            }
+        }
+
+        // Helper function to show success messages
+        function showSuccessMessage(message) {
+            const refreshBtn = document.getElementById('refreshBtn');
+            const originalText = refreshBtn.innerHTML;
+            refreshBtn.innerHTML = message;
+            refreshBtn.classList.add('bg-green-600');
+            setTimeout(() => {
+                refreshBtn.innerHTML = originalText;
+                refreshBtn.classList.remove('bg-green-600');
+            }, 3000);
+        }
+
+        // Update dashboard with pre-calculated summary data
+        function updateDashboardWithSummary(summary) {
+            console.log('📊 Updating dashboard with pre-calculated summary:', summary);
+            
+            // Update main scorecard with summary data
+            if (summary.totals) {
+                document.getElementById('totalKlaim').textContent = formatCurrency(summary.totals.klaim);
+                document.getElementById('totalBilling').textContent = formatCurrency(summary.totals.billing);
+                document.getElementById('totalPasien').textContent = summary.totals.pasien.toLocaleString('id-ID');
+                
+                const selisih = summary.totals.klaim - summary.totals.billing;
+                const selisihElement = document.getElementById('selisihTotal');
+                selisihElement.textContent = formatCurrency(selisih);
+                selisihElement.className = `text-2xl font-bold ${selisih >= 0 ? 'text-green-600' : 'text-red-600'}`;
+            }
+            
+            // Update breakdown if available
+            if (summary.breakdown) {
+                document.getElementById('klaimRanap').textContent = formatCurrency(summary.breakdown.ranap.klaim);
+                document.getElementById('klaimRalan').textContent = formatCurrency(summary.breakdown.ralan.klaim);
+                document.getElementById('billingRanap').textContent = formatCurrency(summary.breakdown.ranap.billing);
+                document.getElementById('billingRalan').textContent = formatCurrency(summary.breakdown.ralan.billing);
+                document.getElementById('pasienRanap').textContent = summary.breakdown.ranap.pasien.toLocaleString('id-ID');
+                document.getElementById('pasienRalan').textContent = summary.breakdown.ralan.pasien.toLocaleString('id-ID');
+                
+                const selisihRanap = summary.breakdown.ranap.klaim - summary.breakdown.ranap.billing;
+                const selisihRalan = summary.breakdown.ralan.klaim - summary.breakdown.ralan.billing;
+                
+                const selisihRanapElement = document.getElementById('selisihRanap');
+                selisihRanapElement.textContent = formatCurrency(selisihRanap);
+                selisihRanapElement.className = `text-sm font-semibold ${selisihRanap >= 0 ? 'text-green-700' : 'text-red-700'}`;
+                
+                const selisihRalanElement = document.getElementById('selisihRalan');
+                selisihRalanElement.textContent = formatCurrency(selisihRalan);
+                selisihRalanElement.className = `text-sm font-semibold ${selisihRalan >= 0 ? 'text-green-700' : 'text-red-700'}`;
+            }
+            
+            // Update other components with regular data processing
+            updateCategoryCards();
+            updateRoomTable();
+            updateDPJPTable();
+            updateMonthlyTable();
+            populateDPJPFilter();
+        }
+
+        // Fallback sample data
+        function loadSampleData() {
+            console.log('Loading sample data as fallback...');
+            hospitalData = [
+                {
+                    DISCHARGE_DATE: '2025-01-01',
+                    DPJP: 'DR. SAMPLE DOCTOR',
+                    RUANGAN: 'RAWAT INAP',
+                    'JENIS PELAYANAN': 'Rawat Inap',
+                    JLH_PASIEN: 1,
+                    TOTAL_KLAIM: 5000000,
+                    TOTAL_BILLING: 4500000,
+                    LOS: 3,
+                    PROSEDUR_NON_BEDAH: 500000,
+                    PROSEDUR_BEDAH: 1000000,
+                    KONSULTASI: 200000,
+                    TENAGA_AHLI: 300000,
+                    KEPERAWATAN: 400000,
+                    PENUNJANG: 150000,
+                    RADIOLOGI: 250000,
+                    LABORATORIUM: 180000,
+                    PELAYANAN_DARAH: 100000,
+                    REHABILITASI: 120000,
+                    KAMAR_AKOMODASI: 800000,
+                    RAWAT_INTENSIF: 0,
+                    OBAT: 600000,
+                    ALKES: 200000,
+                    BMHP: 150000,
+                    SEWA_ALAT: 50000,
+                    OBAT_KRONIS: 0,
+                    OBAT_KEMO: 0
+                }
+            ];
+            filteredData = [...hospitalData];
+            updateDashboard();
+            updateLastUpdatedTime();
+            
+            alert('Sample data loaded. Please check Google Sheets URLs and try again.');
+        }
+
+        // Update main scorecard
+        function updateScorecard() {
+            // Initialize totals
+            let totalKlaim = 0, totalBilling = 0, totalPasien = 0;
+            let klaimRanap = 0, klaimRalan = 0;
+            let billingRanap = 0, billingRalan = 0;
+            let pasienRanap = 0, pasienRalan = 0;
+
+            // Calculate totals and breakdown by service type
+            filteredData.forEach(row => {
+                const klaim = row.Total_Klaim || row.TOTAL_KLAIM || row['Total Klaim'] || 0;
+                const billing = row.Total_Billing || row.TOTAL_BILLING || row['Total Billing'] || 0;
+                const pasien = row.Jlh_Pasien || row.JLH_PASIEN || row['Jumlah Pasien'] || row['Jlh Pasien'] || 0;
+                
+                // Add to totals
+                totalKlaim += klaim;
+                totalBilling += billing;
+                totalPasien += pasien;
+                
+                // Determine service type
+                const service = row['JENIS PELAYANAN'] || 
+                              row['Jenis Pelayanan'] || 
+                              row.JENIS_PELAYANAN || 
+                              row['JENIS_PELAYANAN'] ||
+                              row['Jenis_Pelayanan'] ||
+                              row.JenisPelayanan ||
+                              row.jenis_pelayanan ||
+                              row.SERVICE_TYPE ||
+                              row.service_type ||
+                              row.Ruangan ||
+                              row.RUANGAN ||
+                              '';
+                
+                const serviceStr = service.toString().toLowerCase().trim();
+                
+                // Classify as Rawat Inap or Rawat Jalan
+                if (serviceStr.includes('inap') || 
+                    serviceStr.includes('ranap') ||
+                    serviceStr.includes('ri ') ||
+                    serviceStr.includes('rawat inap') ||
+                    (serviceStr.includes('ruang') && !serviceStr.includes('jalan')) ||
+                    serviceStr.includes('ward') ||
+                    serviceStr.includes('bangsal')) {
+                    // Rawat Inap
+                    klaimRanap += klaim;
+                    billingRanap += billing;
+                    pasienRanap += pasien;
+                } else {
+                    // Default to Rawat Jalan (includes outpatient, emergency, etc.)
+                    klaimRalan += klaim;
+                    billingRalan += billing;
+                    pasienRalan += pasien;
+                }
+            });
+            
+            const selisih = totalKlaim - totalBilling;
+            const selisihRanap = klaimRanap - billingRanap;
+            const selisihRalan = klaimRalan - billingRalan;
+
+            // Update main totals
+            document.getElementById('totalKlaim').textContent = formatCurrency(totalKlaim);
+            document.getElementById('totalBilling').textContent = formatCurrency(totalBilling);
+            document.getElementById('totalPasien').textContent = totalPasien.toLocaleString('id-ID');
+            
+            const selisihElement = document.getElementById('selisihTotal');
+            selisihElement.textContent = formatCurrency(selisih);
+            selisihElement.className = `text-2xl font-bold ${selisih >= 0 ? 'text-green-600' : 'text-red-600'}`;
+
+            // Update breakdown values
+            document.getElementById('klaimRanap').textContent = formatCurrency(klaimRanap);
+            document.getElementById('klaimRalan').textContent = formatCurrency(klaimRalan);
+            document.getElementById('billingRanap').textContent = formatCurrency(billingRanap);
+            document.getElementById('billingRalan').textContent = formatCurrency(billingRalan);
+            document.getElementById('pasienRanap').textContent = pasienRanap.toLocaleString('id-ID');
+            document.getElementById('pasienRalan').textContent = pasienRalan.toLocaleString('id-ID');
+            
+            // Update selisih breakdown with colors
+            const selisihRanapElement = document.getElementById('selisihRanap');
+            selisihRanapElement.textContent = formatCurrency(selisihRanap);
+            selisihRanapElement.className = `text-sm font-semibold ${selisihRanap >= 0 ? 'text-green-700' : 'text-red-700'}`;
+            
+            const selisihRalanElement = document.getElementById('selisihRalan');
+            selisihRalanElement.textContent = formatCurrency(selisihRalan);
+            selisihRalanElement.className = `text-sm font-semibold ${selisihRalan >= 0 ? 'text-green-700' : 'text-red-700'}`;
+        }
+
+        // Update category cards
+        function updateCategoryCards() {
+            const categoryContainer = document.getElementById('categoryCards');
+            categoryContainer.innerHTML = '';
+
+            categories.forEach(category => {
+                const total = filteredData.reduce((sum, row) => sum + (row[category] || 0), 0);
+                
+                const card = document.createElement('div');
+                card.className = 'bg-gray-50 rounded-lg p-4 border border-gray-200';
+                card.innerHTML = `
+                    <h4 class="text-sm font-medium text-gray-600 mb-2">${category.replace(/_/g, ' ')}</h4>
+                    <p class="text-lg font-bold text-gray-900">${formatCurrency(total)}</p>
+                `;
+                categoryContainer.appendChild(card);
+            });
+        }
+
+        // Update room table with pagination and search
+        function updateRoomTable() {
+            // Prepare room data
+            const roomDataObj = {};
+            filteredData.forEach(row => {
+                const room = row.Ruangan || row.RUANGAN || row['Ruangan'] || 'Unknown';
+                if (!roomDataObj[room]) {
+                    roomDataObj[room] = { patients: 0, klaim: 0, billing: 0 };
+                }
+                roomDataObj[room].patients += row.Jlh_Pasien || row.JLH_PASIEN || row['Jumlah Pasien'] || row['Jlh Pasien'] || 0;
+                roomDataObj[room].klaim += row.Total_Klaim || row.TOTAL_KLAIM || row['Total Klaim'] || 0;
+                roomDataObj[room].billing += row.Total_Billing || row.TOTAL_BILLING || row['Total Billing'] || 0;
+            });
+
+            // Convert to array and add calculated fields
+            roomData = Object.entries(roomDataObj).map(([room, data]) => ({
+                room,
+                patients: data.patients,
+                klaim: data.klaim,
+                billing: data.billing,
+                selisih: data.klaim - data.billing,
+                percentage: data.billing > 0 ? ((data.klaim - data.billing) / data.billing * 100).toFixed(2) : 0
+            }));
+
+            // Apply search filter
+            const searchTerm = document.getElementById('roomSearch').value.toLowerCase();
+            let filteredRoomData = roomData.filter(item => 
+                item.room.toLowerCase().includes(searchTerm)
+            );
+
+            // Sort by total klaim descending
+            filteredRoomData.sort((a, b) => b.klaim - a.klaim);
+
+            // Pagination
+            const rowsPerPage = document.getElementById('roomRowsPerPage').value;
+            const totalRows = filteredRoomData.length;
+            const totalPages = rowsPerPage === 'all' ? 1 : Math.ceil(totalRows / parseInt(rowsPerPage));
+            
+            let startIndex = 0;
+            let endIndex = filteredRoomData.length;
+            
+            if (rowsPerPage !== 'all') {
+                startIndex = (currentRoomPage - 1) * parseInt(rowsPerPage);
+                endIndex = Math.min(startIndex + parseInt(rowsPerPage), totalRows);
+            }
+
+            const paginatedData = filteredRoomData.slice(startIndex, endIndex);
+
+            // Update table
+            const tbody = document.getElementById('roomTable');
+            tbody.innerHTML = '';
+
+            paginatedData.forEach((data, index) => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-gray-900">${startIndex + index + 1}</td>
+                    <td class="px-4 py-3 text-gray-900 font-medium">${data.room}</td>
+                    <td class="px-4 py-3 text-center text-gray-900">${data.patients.toLocaleString('id-ID')}</td>
+                    <td class="px-4 py-3 text-right text-gray-900">${formatCurrency(data.klaim)}</td>
+                    <td class="px-4 py-3 text-right text-gray-900">${formatCurrency(data.billing)}</td>
+                    <td class="px-4 py-3 text-right font-medium ${data.selisih >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(data.selisih)}</td>
+                    <td class="px-4 py-3 text-right font-medium ${data.percentage >= 0 ? 'text-green-600' : 'text-red-600'}">${data.percentage}%</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Update pagination
+            updateRoomPagination(totalPages, totalRows);
+
+            // Update room totals
+            const totalPatients = filteredRoomData.reduce((sum, data) => sum + data.patients, 0);
+            const totalKlaim = filteredRoomData.reduce((sum, data) => sum + data.klaim, 0);
+            const totalBilling = filteredRoomData.reduce((sum, data) => sum + data.billing, 0);
+            const totalSelisih = totalKlaim - totalBilling;
+            const totalPercentage = totalBilling > 0 ? ((totalSelisih / totalBilling) * 100).toFixed(2) : 0;
+
+            document.getElementById('roomTotalPatients').textContent = totalPatients.toLocaleString('id-ID');
+            document.getElementById('roomTotalKlaim').textContent = formatCurrency(totalKlaim);
+            document.getElementById('roomTotalBilling').textContent = formatCurrency(totalBilling);
+            document.getElementById('roomTotalSelisih').textContent = formatCurrency(totalSelisih);
+            document.getElementById('roomTotalSelisih').className = `px-4 py-3 text-right ${totalSelisih >= 0 ? 'text-green-600' : 'text-red-600'}`;
+            document.getElementById('roomTotalPercentage').textContent = `${totalPercentage}%`;
+            document.getElementById('roomTotalPercentage').className = `px-4 py-3 text-right ${totalPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`;
+        }
+
+        // Update room pagination
+        function updateRoomPagination(totalPages, totalRows) {
+            const pagination = document.getElementById('roomPagination');
+            pagination.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            // Previous button
+            const prevBtn = document.createElement('button');
+            prevBtn.className = `px-3 py-2 mx-1 rounded-lg ${currentRoomPage === 1 ? 'bg-gray-200 text-gray-400' : 'bg-blue-600 text-white hover:bg-blue-700'}`;
+            prevBtn.textContent = 'Previous';
+            prevBtn.disabled = currentRoomPage === 1;
+            prevBtn.onclick = () => {
+                if (currentRoomPage > 1) {
+                    currentRoomPage--;
+                    updateRoomTable();
+                }
+            };
+            pagination.appendChild(prevBtn);
+
+            // Page numbers
+            for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `px-3 py-2 mx-1 rounded-lg ${i === currentRoomPage ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`;
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => {
+                    currentRoomPage = i;
+                    updateRoomTable();
+                };
+                pagination.appendChild(pageBtn);
+            }
+
+            // Next button
+            const nextBtn = document.createElement('button');
+            nextBtn.className = `px-3 py-2 mx-1 rounded-lg ${currentRoomPage === totalPages ? 'bg-gray-200 text-gray-400' : 'bg-blue-600 text-white hover:bg-blue-700'}`;
+            nextBtn.textContent = 'Next';
+            nextBtn.disabled = currentRoomPage === totalPages;
+            nextBtn.onclick = () => {
+                if (currentRoomPage < totalPages) {
+                    currentRoomPage++;
+                    updateRoomTable();
+                }
+            };
+            pagination.appendChild(nextBtn);
+
+            // Info
+            const info = document.createElement('span');
+            info.className = 'px-4 py-2 text-gray-600';
+            info.textContent = `Showing ${totalRows} entries`;
+            pagination.appendChild(info);
+        }
+
+        // Update DPJP table with pagination and search
+        function updateDPJPTable() {
+            // Prepare DPJP data
+            const dpjpDataObj = {};
+            filteredData.forEach(row => {
+                const dpjp = row.DPJP || row.Dpjp || row['DPJP'] || 'Unknown';
+                if (!dpjpDataObj[dpjp]) {
+                    dpjpDataObj[dpjp] = { patients: 0, klaim: 0, billing: 0 };
+                }
+                dpjpDataObj[dpjp].patients += row.Jlh_Pasien || row.JLH_PASIEN || row['Jumlah Pasien'] || row['Jlh Pasien'] || 0;
+                dpjpDataObj[dpjp].klaim += row.Total_Klaim || row.TOTAL_KLAIM || row['Total Klaim'] || 0;
+                dpjpDataObj[dpjp].billing += row.Total_Billing || row.TOTAL_BILLING || row['Total Billing'] || 0;
+            });
+
+            // Convert to array and add calculated fields
+            dpjpData = Object.entries(dpjpDataObj).map(([dpjp, data]) => ({
+                dpjp,
+                patients: data.patients,
+                klaim: data.klaim,
+                billing: data.billing,
+                selisih: data.klaim - data.billing,
+                percentage: data.billing > 0 ? ((data.klaim - data.billing) / data.billing * 100).toFixed(2) : 0
+            }));
+
+            // Apply search filter
+            const searchTerm = document.getElementById('dpjpSearchTable').value.toLowerCase();
+            let filteredDPJPData = dpjpData.filter(item => 
+                item.dpjp.toLowerCase().includes(searchTerm)
+            );
+
+            // Sort by total klaim descending
+            filteredDPJPData.sort((a, b) => b.klaim - a.klaim);
+
+            // Pagination
+            const rowsPerPage = document.getElementById('dpjpRowsPerPage').value;
+            const totalRows = filteredDPJPData.length;
+            const totalPages = rowsPerPage === 'all' ? 1 : Math.ceil(totalRows / parseInt(rowsPerPage));
+            
+            let startIndex = 0;
+            let endIndex = filteredDPJPData.length;
+            
+            if (rowsPerPage !== 'all') {
+                startIndex = (currentDPJPPage - 1) * parseInt(rowsPerPage);
+                endIndex = Math.min(startIndex + parseInt(rowsPerPage), totalRows);
+            }
+
+            const paginatedData = filteredDPJPData.slice(startIndex, endIndex);
+
+            // Update table
+            const tbody = document.getElementById('dpjpTable');
+            tbody.innerHTML = '';
+
+            paginatedData.forEach((data, index) => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-gray-900">${startIndex + index + 1}</td>
+                    <td class="px-4 py-3 text-gray-900 font-medium">${data.dpjp}</td>
+                    <td class="px-4 py-3 text-center text-gray-900">${data.patients.toLocaleString('id-ID')}</td>
+                    <td class="px-4 py-3 text-right text-gray-900">${formatCurrency(data.klaim)}</td>
+                    <td class="px-4 py-3 text-right text-gray-900">${formatCurrency(data.billing)}</td>
+                    <td class="px-4 py-3 text-right font-medium ${data.selisih >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(data.selisih)}</td>
+                    <td class="px-4 py-3 text-right font-medium ${data.percentage >= 0 ? 'text-green-600' : 'text-red-600'}">${data.percentage}%</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Update pagination
+            updateDPJPPagination(totalPages, totalRows);
+
+            // Update DPJP totals
+            const totalPatients = filteredDPJPData.reduce((sum, data) => sum + data.patients, 0);
+            const totalKlaim = filteredDPJPData.reduce((sum, data) => sum + data.klaim, 0);
+            const totalBilling = filteredDPJPData.reduce((sum, data) => sum + data.billing, 0);
+            const totalSelisih = totalKlaim - totalBilling;
+            const totalPercentage = totalBilling > 0 ? ((totalSelisih / totalBilling) * 100).toFixed(2) : 0;
+
+            document.getElementById('dpjpTotalPatients').textContent = totalPatients.toLocaleString('id-ID');
+            document.getElementById('dpjpTotalKlaim').textContent = formatCurrency(totalKlaim);
+            document.getElementById('dpjpTotalBilling').textContent = formatCurrency(totalBilling);
+            document.getElementById('dpjpTotalSelisih').textContent = formatCurrency(totalSelisih);
+            document.getElementById('dpjpTotalSelisih').className = `px-4 py-3 text-right ${totalSelisih >= 0 ? 'text-green-600' : 'text-red-600'}`;
+            document.getElementById('dpjpTotalPercentage').textContent = `${totalPercentage}%`;
+            document.getElementById('dpjpTotalPercentage').className = `px-4 py-3 text-right ${totalPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`;
+        }
+
+        // Update DPJP pagination
+        function updateDPJPPagination(totalPages, totalRows) {
+            const pagination = document.getElementById('dpjpPagination');
+            pagination.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            // Previous button
+            const prevBtn = document.createElement('button');
+            prevBtn.className = `px-3 py-2 mx-1 rounded-lg ${currentDPJPPage === 1 ? 'bg-gray-200 text-gray-400' : 'bg-blue-600 text-white hover:bg-blue-700'}`;
+            prevBtn.textContent = 'Previous';
+            prevBtn.disabled = currentDPJPPage === 1;
+            prevBtn.onclick = () => {
+                if (currentDPJPPage > 1) {
+                    currentDPJPPage--;
+                    updateDPJPTable();
+                }
+            };
+            pagination.appendChild(prevBtn);
+
+            // Page numbers
+            for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `px-3 py-2 mx-1 rounded-lg ${i === currentDPJPPage ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`;
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => {
+                    currentDPJPPage = i;
+                    updateDPJPTable();
+                };
+                pagination.appendChild(pageBtn);
+            }
+
+            // Next button
+            const nextBtn = document.createElement('button');
+            nextBtn.className = `px-3 py-2 mx-1 rounded-lg ${currentDPJPPage === totalPages ? 'bg-gray-200 text-gray-400' : 'bg-blue-600 text-white hover:bg-blue-700'}`;
+            nextBtn.textContent = 'Next';
+            nextBtn.disabled = currentDPJPPage === totalPages;
+            nextBtn.onclick = () => {
+                if (currentDPJPPage < totalPages) {
+                    currentDPJPPage++;
+                    updateDPJPTable();
+                }
+            };
+            pagination.appendChild(nextBtn);
+
+            // Info
+            const info = document.createElement('span');
+            info.className = 'px-4 py-2 text-gray-600';
+            info.textContent = `Showing ${totalRows} entries`;
+            pagination.appendChild(info);
+        }
+
+        // Update monthly trend table and charts
+        function updateMonthlyTable() {
+            const monthlyData = {};
+            const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                              'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+            filteredData.forEach(row => {
+                const dischargeDate = row.Discharge_Date || row.DISCHARGE_DATE || row['Tanggal Keluar'] || row['Discharge Date'];
+                if (dischargeDate) {
+                    const date = parseIndonesianDate(dischargeDate);
+                    if (date && !isNaN(date.getTime())) {
+                        const monthKey = date.getMonth();
+                        const monthName = monthNames[monthKey];
+                        
+                        if (!monthlyData[monthName]) {
+                            monthlyData[monthName] = { patients: 0, klaim: 0, billing: 0 };
+                        }
+                        monthlyData[monthName].patients += row.Jlh_Pasien || row.JLH_PASIEN || row['Jumlah Pasien'] || row['Jlh Pasien'] || 0;
+                        monthlyData[monthName].klaim += row.Total_Klaim || row.TOTAL_KLAIM || row['Total Klaim'] || 0;
+                        monthlyData[monthName].billing += row.Total_Billing || row.TOTAL_BILLING || row['Total Billing'] || 0;
+                    }
+                }
+            });
+
+            const tbody = document.getElementById('monthlyTable');
+            tbody.innerHTML = '';
+
+            let totalPatients = 0;
+            let totalKlaim = 0;
+            let totalBilling = 0;
+
+            // Prepare chart data
+            const chartLabels = [];
+            const klaimData = [];
+            const billingData = [];
+            const patientData = [];
+
+            // Sort months in chronological order
+            const sortedMonths = monthNames.filter(month => monthlyData[month]);
+            
+            sortedMonths.forEach(month => {
+                const data = monthlyData[month];
+                const selisih = data.klaim - data.billing;
+                const percentage = data.billing > 0 ? ((selisih / data.billing) * 100).toFixed(2) : 0;
+                
+                // Add to totals
+                totalPatients += data.patients;
+                totalKlaim += data.klaim;
+                totalBilling += data.billing;
+                
+                // Add to chart data
+                chartLabels.push(month);
+                klaimData.push(data.klaim);
+                billingData.push(data.billing);
+                patientData.push(data.patients);
+                
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-gray-900 font-medium">${month}</td>
+                    <td class="px-4 py-3 text-center text-gray-900">${data.patients.toLocaleString('id-ID')}</td>
+                    <td class="px-4 py-3 text-right text-gray-900">${formatCurrency(data.klaim)}</td>
+                    <td class="px-4 py-3 text-right text-gray-900">${formatCurrency(data.billing)}</td>
+                    <td class="px-4 py-3 text-right font-medium ${selisih >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(selisih)}</td>
+                    <td class="px-4 py-3 text-right font-medium ${percentage >= 0 ? 'text-green-600' : 'text-red-600'}">${percentage}%</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Update monthly totals
+            const totalSelisih = totalKlaim - totalBilling;
+            const totalPercentage = totalBilling > 0 ? ((totalSelisih / totalBilling) * 100).toFixed(2) : 0;
+
+            document.getElementById('monthlyTotalPatients').textContent = totalPatients.toLocaleString('id-ID');
+            document.getElementById('monthlyTotalKlaim').textContent = formatCurrency(totalKlaim);
+            document.getElementById('monthlyTotalBilling').textContent = formatCurrency(totalBilling);
+            document.getElementById('monthlyTotalSelisih').textContent = formatCurrency(totalSelisih);
+            document.getElementById('monthlyTotalSelisih').className = `px-4 py-3 text-right ${totalSelisih >= 0 ? 'text-green-600' : 'text-red-600'}`;
+            document.getElementById('monthlyTotalPercentage').textContent = `${totalPercentage}%`;
+            document.getElementById('monthlyTotalPercentage').className = `px-4 py-3 text-right ${totalPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`;
+
+            // Update charts
+            updateMonthlyChart(chartLabels, klaimData, billingData);
+            updatePatientChart(chartLabels, patientData);
+        }
+
+        // Create/Update monthly klaim vs billing chart
+        function updateMonthlyChart(labels, klaimData, billingData) {
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            
+            if (monthlyChart) {
+                monthlyChart.destroy();
+            }
+
+            const config = {
+                type: currentChartType,
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Total Klaim',
+                            data: klaimData,
+                            borderColor: '#3b82f6',
+                            backgroundColor: currentChartType === 'bar' ? '#3b82f6' : 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 2,
+                            fill: currentChartType === 'line',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Total Billing',
+                            data: billingData,
+                            borderColor: '#10b981',
+                            backgroundColor: currentChartType === 'bar' ? '#10b981' : 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 2,
+                            fill: currentChartType === 'line',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Trend Klaim vs Billing ${currentYear}`,
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + formatCurrency(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Rp ' + (value / 1000000).toFixed(0) + 'M';
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            };
+
+            monthlyChart = new Chart(ctx, config);
+        }
+
+        // Create/Update patient count chart
+        function updatePatientChart(labels, patientData) {
+            const ctx = document.getElementById('patientChart').getContext('2d');
+            
+            if (patientChart) {
+                patientChart.destroy();
+            }
+
+            // Prepare separate data for Rawat Inap and Rawat Jalan
+            const ranapData = [];
+            const ralanData = [];
+
+            labels.forEach(month => {
+                let ranapCount = 0;
+                let ralanCount = 0;
+
+                filteredData.forEach(row => {
+                    const dischargeDate = row.Discharge_Date || row.DISCHARGE_DATE || row['Tanggal Keluar'] || row['Discharge Date'];
+                    if (dischargeDate) {
+                        const date = parseIndonesianDate(dischargeDate);
+                        if (date && !isNaN(date.getTime())) {
+                            const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                                              'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                            const rowMonth = monthNames[date.getMonth()];
+                            
+                            if (rowMonth === month) {
+                                const service = row['JENIS PELAYANAN'] || 
+                                              row['Jenis Pelayanan'] || 
+                                              row.JENIS_PELAYANAN || 
+                                              row['JENIS_PELAYANAN'] ||
+                                              row['Jenis_Pelayanan'] ||
+                                              row.JenisPelayanan ||
+                                              row.jenis_pelayanan ||
+                                              row.SERVICE_TYPE ||
+                                              row.service_type ||
+                                              row.Ruangan ||
+                                              row.RUANGAN ||
+                                              '';
+                                
+                                const serviceStr = service.toString().toLowerCase().trim();
+                                const patientCount = row.Jlh_Pasien || row.JLH_PASIEN || row['Jumlah Pasien'] || row['Jlh Pasien'] || 0;
+                                
+                                // Classify as Rawat Inap or Rawat Jalan
+                                if (serviceStr.includes('inap') || 
+                                    serviceStr.includes('ranap') ||
+                                    serviceStr.includes('ri ') ||
+                                    serviceStr.includes('rawat inap') ||
+                                    (serviceStr.includes('ruang') && !serviceStr.includes('jalan')) ||
+                                    serviceStr.includes('ward') ||
+                                    serviceStr.includes('bangsal')) {
+                                    ranapCount += patientCount;
+                                } else if (serviceStr.includes('jalan') ||
+                                          serviceStr.includes('ralan') ||
+                                          serviceStr.includes('rj ') ||
+                                          serviceStr.includes('rawat jalan') ||
+                                          serviceStr.includes('igd') ||
+                                          serviceStr.includes('poli') ||
+                                          serviceStr.includes('klinik') ||
+                                          serviceStr.includes('clinic') ||
+                                          serviceStr.includes('ambulatori') ||
+                                          serviceStr.includes('outpatient') ||
+                                          serviceStr.includes('emergency') ||
+                                          serviceStr.includes('ugd')) {
+                                    ralanCount += patientCount;
+                                } else {
+                                    // Default classification based on common patterns
+                                    ralanCount += patientCount;
+                                }
+                            }
+                        }
+                    }
+                });
+
+                ranapData.push(ranapCount);
+                ralanData.push(ralanCount);
+            });
+
+            const config = {
+                type: currentPatientChartType,
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Rawat Inap',
+                            data: ranapData,
+                            borderColor: '#ef4444',
+                            backgroundColor: currentPatientChartType === 'bar' ? '#ef4444' : 'rgba(239, 68, 68, 0.1)',
+                            borderWidth: 2,
+                            fill: currentPatientChartType === 'line',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Rawat Jalan',
+                            data: ralanData,
+                            borderColor: '#22c55e',
+                            backgroundColor: currentPatientChartType === 'bar' ? '#22c55e' : 'rgba(34, 197, 94, 0.1)',
+                            borderWidth: 2,
+                            fill: currentPatientChartType === 'line',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Jumlah Pasien Bulanan ${currentYear}`,
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toLocaleString('id-ID') + ' pasien';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            stacked: currentPatientChartType === 'bar',
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString('id-ID');
+                                }
+                            }
+                        },
+                        x: {
+                            stacked: currentPatientChartType === 'bar',
+                            ticks: {
+                                maxRotation: 45
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            };
+
+            patientChart = new Chart(ctx, config);
+        }
+
+        // Toggle chart types
+        function toggleChartType() {
+            currentChartType = currentChartType === 'line' ? 'bar' : 'line';
+            const button = document.getElementById('chartTypeToggle');
+            button.textContent = currentChartType === 'line' ? '📈 Line Chart' : '📊 Bar Chart';
+            updateMonthlyTable(); // This will recreate the chart
+        }
+
+        function togglePatientChartType() {
+            currentPatientChartType = currentPatientChartType === 'bar' ? 'line' : 'bar';
+            const button = document.getElementById('patientChartTypeToggle');
+            button.textContent = currentPatientChartType === 'bar' ? '📊 Bar Chart' : '📈 Line Chart';
+            updateMonthlyTable(); // This will recreate the chart
+        }
+
+
+
+        // Export functions
+        function exportToCSV() {
+            if (filteredData.length === 0) return;
+            
+            const headers = Object.keys(filteredData[0]).filter(key => key !== 'PTD');
+            const csvContent = [
+                headers.join(','),
+                ...filteredData.map(row => 
+                    headers.map(header => `"${row[header] || ''}"`).join(',')
+                )
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `hospital_data_${currentYear}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function exportToXLSX() {
+            if (filteredData.length === 0) return;
+            
+            const headers = Object.keys(filteredData[0]).filter(key => key !== 'PTD');
+            const wsData = [
+                headers,
+                ...filteredData.map(row => headers.map(header => row[header] || ''))
+            ];
+
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Hospital Data');
+            XLSX.writeFile(wb, `hospital_data_${currentYear}.xlsx`);
+        }
+
+        // Export room data
+        function exportRoomToCSV() {
+            if (roomData.length === 0) return;
+            
+            const headers = ['No', 'Ruangan', 'Jumlah Pasien', 'Total Klaim', 'Total Billing', 'Selisih', 'Persentase'];
+            const csvContent = [
+                headers.join(','),
+                ...roomData.map((row, index) => [
+                    index + 1,
+                    `"${row.room}"`,
+                    row.patients,
+                    row.klaim,
+                    row.billing,
+                    row.selisih,
+                    `${row.percentage}%`
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `rekap_ruangan_${currentYear}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function exportRoomToXLSX() {
+            if (roomData.length === 0) return;
+            
+            const headers = ['No', 'Ruangan', 'Jumlah Pasien', 'Total Klaim', 'Total Billing', 'Selisih', 'Persentase'];
+            const wsData = [
+                headers,
+                ...roomData.map((row, index) => [
+                    index + 1,
+                    row.room,
+                    row.patients,
+                    row.klaim,
+                    row.billing,
+                    row.selisih,
+                    `${row.percentage}%`
+                ])
+            ];
+
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Rekap Ruangan');
+            XLSX.writeFile(wb, `rekap_ruangan_${currentYear}.xlsx`);
+        }
+
+        // Export DPJP data
+        function exportDPJPToCSV() {
+            if (dpjpData.length === 0) return;
+            
+            const headers = ['No', 'DPJP', 'Jumlah Pasien', 'Total Klaim', 'Total Billing', 'Selisih', 'Persentase'];
+            const csvContent = [
+                headers.join(','),
+                ...dpjpData.map((row, index) => [
+                    index + 1,
+                    `"${row.dpjp}"`,
+                    row.patients,
+                    row.klaim,
+                    row.billing,
+                    row.selisih,
+                    `${row.percentage}%`
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `rekap_dpjp_${currentYear}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function exportDPJPToXLSX() {
+            if (dpjpData.length === 0) return;
+            
+            const headers = ['No', 'DPJP', 'Jumlah Pasien', 'Total Klaim', 'Total Billing', 'Selisih', 'Persentase'];
+            const wsData = [
+                headers,
+                ...dpjpData.map((row, index) => [
+                    index + 1,
+                    row.dpjp,
+                    row.patients,
+                    row.klaim,
+                    row.billing,
+                    row.selisih,
+                    `${row.percentage}%`
+                ])
+            ];
+
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Rekap DPJP');
+            XLSX.writeFile(wb, `rekap_dpjp_${currentYear}.xlsx`);
+        }
+
+        // Populate DPJP filter options
+        function populateDPJPFilter(searchTerm = '') {
+            const dpjpContainer = document.getElementById('dpjpCheckboxContainer');
+            const uniqueDPJPs = [...new Set(hospitalData.map(row => 
+                row.DPJP || row.Dpjp || row['DPJP'] || 'Unknown'
+            ))].filter(dpjp => dpjp !== 'Unknown').sort();
+
+            // Filter DPJPs based on search term
+            const filteredDPJPs = uniqueDPJPs.filter(dpjp => 
+                dpjp.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            dpjpContainer.innerHTML = '';
+            filteredDPJPs.forEach(dpjp => {
+                const label = document.createElement('label');
+                label.className = 'flex items-center text-sm dpjp-option';
+                label.innerHTML = `<input type="checkbox" class="dpjp-checkbox mr-2 rounded" value="${dpjp}"> ${dpjp}`;
+                dpjpContainer.appendChild(label);
+            });
+
+            // Update "Select All" checkbox state
+            updateSelectAllDPJPState();
+        }
+
+        // Update Select All DPJP checkbox state
+        function updateSelectAllDPJPState() {
+            const visibleCheckboxes = document.querySelectorAll('.dpjp-checkbox');
+            const checkedCheckboxes = document.querySelectorAll('.dpjp-checkbox:checked');
+            const selectAllCheckbox = document.getElementById('selectAllDPJP');
+            
+            if (visibleCheckboxes.length === 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            } else if (checkedCheckboxes.length === visibleCheckboxes.length) {
+                selectAllCheckbox.checked = true;
+                selectAllCheckbox.indeterminate = false;
+            } else if (checkedCheckboxes.length > 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = true;
+            } else {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            }
+        }
+
+        // Apply filters
+        function applyFilters() {
+            console.log('Starting filter with', hospitalData.length, 'records');
+            filteredData = [...hospitalData];
+            let filterCount = 0;
+            let filterDescription = [];
+            
+            // Debug: Show sample data structure
+            if (hospitalData.length > 0) {
+                console.log('Sample data columns:', Object.keys(hospitalData[0]));
+                console.log('Sample service values:', hospitalData.slice(0, 5).map(row => ({
+                    'JENIS PELAYANAN': row['JENIS PELAYANAN'],
+                    'Jenis Pelayanan': row['Jenis Pelayanan'],
+                    'RUANGAN': row.RUANGAN,
+                    'Ruangan': row.Ruangan
+                })));
+            }
+
+            // Date filters
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (startDate || endDate) {
+                filteredData = filteredData.filter(row => {
+                    const dischargeDate = row.Discharge_Date || row.DISCHARGE_DATE || row['Tanggal Keluar'] || row['Discharge Date'];
+                    if (!dischargeDate) return false;
+                    const rowDate = new Date(dischargeDate);
+                    if (startDate && rowDate < new Date(startDate)) return false;
+                    if (endDate && rowDate > new Date(endDate)) return false;
+                    return true;
+                });
+                filterCount++;
+                if (startDate && endDate) {
+                    filterDescription.push(`📅 ${startDate} s/d ${endDate}`);
+                } else if (startDate) {
+                    filterDescription.push(`📅 Mulai ${startDate}`);
+                } else if (endDate) {
+                    filterDescription.push(`📅 Sampai ${endDate}`);
+                }
+            }
+
+            // Month filter (checkbox selection)
+            const selectedMonths = Array.from(document.querySelectorAll('.month-checkbox:checked')).map(cb => cb.value);
+            if (selectedMonths.length > 0) {
+                filteredData = filteredData.filter(row => {
+                    const dischargeDate = row.Discharge_Date || row.DISCHARGE_DATE || row['Tanggal Keluar'] || row['Discharge Date'];
+                    if (!dischargeDate) return false;
+                    const date = parseIndonesianDate(dischargeDate);
+                    if (!date || isNaN(date.getTime())) return false;
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    return selectedMonths.includes(month);
+                });
+                filterCount++;
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                const selectedMonthNames = selectedMonths.map(m => monthNames[parseInt(m) - 1]);
+                filterDescription.push(`📆 ${selectedMonthNames.join(', ')}`);
+            }
+
+            // DPJP filter (checkbox selection)
+            const selectedDPJPs = Array.from(document.querySelectorAll('.dpjp-checkbox:checked')).map(cb => cb.value);
+            if (selectedDPJPs.length > 0) {
+                filteredData = filteredData.filter(row => {
+                    const dpjp = row.DPJP || row.Dpjp || row['DPJP'] || '';
+                    return selectedDPJPs.includes(dpjp);
+                });
+                filterCount++;
+                filterDescription.push(`👨‍⚕️ ${selectedDPJPs.length} DPJP`);
+            }
+
+            // Service filter - Fixed to properly filter JENIS PELAYANAN column
+            const serviceFilter = document.getElementById('serviceFilter').value;
+            if (serviceFilter) {
+                filteredData = filteredData.filter(row => {
+                    // Try multiple possible column names for service type
+                    const service = row['JENIS PELAYANAN'] || 
+                                  row['Jenis Pelayanan'] || 
+                                  row.JENIS_PELAYANAN || 
+                                  row['JENIS_PELAYANAN'] ||
+                                  row['Jenis_Pelayanan'] ||
+                                  row.JenisPelayanan ||
+                                  row.jenis_pelayanan ||
+                                  row.SERVICE_TYPE ||
+                                  row.service_type ||
+                                  row.Ruangan ||
+                                  row.RUANGAN ||
+                                  '';
+                    
+                    const serviceStr = service.toString().toLowerCase().trim();
+                    const filterStr = serviceFilter.toLowerCase();
+                    
+                    console.log('Filtering service:', serviceStr, 'against filter:', filterStr);
+                    
+                    if (filterStr === 'rawat inap') {
+                        // Match any service containing "inap", "ranap", "ri", or room names that indicate inpatient
+                        return serviceStr.includes('inap') || 
+                               serviceStr.includes('ranap') ||
+                               serviceStr.includes('ri ') ||
+                               serviceStr.includes('rawat inap') ||
+                               (serviceStr.includes('ruang') && !serviceStr.includes('jalan')) ||
+                               serviceStr.includes('ward') ||
+                               serviceStr.includes('bangsal');
+                    } else if (filterStr === 'rawat jalan') {
+                        // Match any service containing "jalan", "ralan", "rj", "igd", "poli", "klinik", "ambulatori", or outpatient indicators
+                        return serviceStr.includes('jalan') ||
+                               serviceStr.includes('ralan') ||
+                               serviceStr.includes('rj ') ||
+                               serviceStr.includes('rawat jalan') ||
+                               serviceStr.includes('igd') ||
+                               serviceStr.includes('poli') ||
+                               serviceStr.includes('klinik') ||
+                               serviceStr.includes('clinic') ||
+                               serviceStr.includes('ambulatori') ||
+                               serviceStr.includes('outpatient') ||
+                               serviceStr.includes('emergency') ||
+                               serviceStr.includes('ugd');
+                    }
+                    
+                    return serviceStr.includes(filterStr);
+                });
+                
+                filterCount++;
+                filterDescription.push(`🏥 ${serviceFilter}`);
+                console.log('Filtered data count after service filter:', filteredData.length);
+            }
+
+            // Update filter status
+            const filterStatus = document.getElementById('filterStatus');
+            if (filterCount === 0) {
+                filterStatus.textContent = '📊 Menampilkan semua data';
+            } else {
+                filterStatus.textContent = `🔍 Filter aktif: ${filterDescription.join(' • ')} (${filteredData.length} data)`;
+            }
+
+            // Reset pagination
+            currentRoomPage = 1;
+            currentDPJPPage = 1;
+
+            updateDashboard();
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('serviceFilter').value = '';
+            
+            // Reset month checkboxes
+            document.querySelectorAll('.month-checkbox').forEach(cb => cb.checked = false);
+            document.getElementById('selectAllMonths').checked = false;
+            
+            // Reset DPJP checkboxes
+            document.querySelectorAll('.dpjp-checkbox').forEach(cb => cb.checked = false);
+            document.getElementById('selectAllDPJP').checked = false;
+            
+            // Reset search fields
+            document.getElementById('roomSearch').value = '';
+            document.getElementById('dpjpSearchTable').value = '';
+            document.getElementById('dpjpSearch').value = '';
+            
+            // Reset pagination
+            currentRoomPage = 1;
+            currentDPJPPage = 1;
+            
+            // Reset filter status
+            document.getElementById('filterStatus').textContent = '📊 Menampilkan semua data';
+            
+            filteredData = [...hospitalData];
+            updateDashboard();
+            
+            // Repopulate DPJP filter without search term
+            populateDPJPFilter();
+        }
+
+
+
+        // Update entire dashboard
+        function updateDashboard() {
+            updateScorecard();
+            updateCategoryCards();
+            updateRoomTable();
+            updateDPJPTable();
+            updateMonthlyTable();
+            populateDPJPFilter();
+        }
+
+        // Configuration management
+        function loadConfigFromStorage() {
+            const savedConfig = localStorage.getItem('hospitalDashboardConfig');
+            if (savedConfig) {
+                const config = JSON.parse(savedConfig);
+                Object.assign(SPREADSHEET_CONFIG, config);
+                
+                // Populate form fields
+                document.getElementById('spreadsheetId2025').value = config[2025]?.id || '';
+                document.getElementById('sheetName2025').value = config[2025]?.sheetName || 'rekap_bliing';
+                document.getElementById('gid2025').value = config[2025]?.gid || '';
+                document.getElementById('appsScriptUrl2025').value = config[2025]?.appsScriptUrl || '';
+                
+                document.getElementById('spreadsheetId2024').value = config[2024]?.id || '';
+                document.getElementById('sheetName2024').value = config[2024]?.sheetName || 'rekap_bliing';
+                document.getElementById('gid2024').value = config[2024]?.gid || '';
+                document.getElementById('appsScriptUrl2024').value = config[2024]?.appsScriptUrl || '';
+                
+                console.log('📂 Configuration loaded from storage:', config);
+            }
+        }
+
+        function saveConfigToStorage() {
+            const config = {
+                2025: {
+                    id: document.getElementById('spreadsheetId2025').value.trim(),
+                    sheetName: document.getElementById('sheetName2025').value.trim() || 'rekap_bliing',
+                    gid: document.getElementById('gid2025').value.trim(),
+                    appsScriptUrl: document.getElementById('appsScriptUrl2025').value.trim()
+                },
+                2024: {
+                    id: document.getElementById('spreadsheetId2024').value.trim(),
+                    sheetName: document.getElementById('sheetName2024').value.trim() || 'rekap_bliing',
+                    gid: document.getElementById('gid2024').value.trim(),
+                    appsScriptUrl: document.getElementById('appsScriptUrl2024').value.trim()
+                }
+            };
+
+            // Validate required fields
+            if (!config[2025].id || !config[2024].id) {
+                alert('Spreadsheet ID wajib diisi untuk kedua tahun!');
+                return false;
+            }
+
+            // Update global config
+            Object.assign(SPREADSHEET_CONFIG, config);
+            
+            // Save to localStorage
+            localStorage.setItem('hospitalDashboardConfig', JSON.stringify(config));
+            
+            console.log('💾 Configuration saved:', config);
+            return true;
+        }
+
+        function resetConfiguration() {
+            localStorage.removeItem('hospitalDashboardConfig');
+            
+            // Reset form fields
+            document.getElementById('spreadsheetId2025').value = '';
+            document.getElementById('sheetName2025').value = 'rekap_bliing';
+            document.getElementById('gid2025').value = '';
+            document.getElementById('appsScriptUrl2025').value = '';
+            
+            document.getElementById('spreadsheetId2024').value = '';
+            document.getElementById('sheetName2024').value = 'rekap_bliing';
+            document.getElementById('gid2024').value = '';
+            document.getElementById('appsScriptUrl2024').value = '';
+            
+            // Reset to default config
+            SPREADSHEET_CONFIG[2025] = { id: '', sheetName: 'rekap_bliing', gid: '', appsScriptUrl: '' };
+            SPREADSHEET_CONFIG[2024] = { id: '', sheetName: 'rekap_bliing', gid: '', appsScriptUrl: '' };
+            
+            alert('Konfigurasi telah direset!');
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved configuration
+            loadConfigFromStorage();
+
+            // Configuration modal
+            document.getElementById('configBtn').addEventListener('click', function() {
+                document.getElementById('configModal').classList.remove('hidden');
+            });
+
+            document.getElementById('closeConfig').addEventListener('click', function() {
+                document.getElementById('configModal').classList.add('hidden');
+            });
+
+            document.getElementById('saveConfig').addEventListener('click', async function() {
+                if (saveConfigToStorage()) {
+                    document.getElementById('configModal').classList.add('hidden');
+                    
+                    // Test connection immediately
+                    const testBtn = this;
+                    const originalText = testBtn.textContent;
+                    testBtn.textContent = 'Testing Connection...';
+                    testBtn.disabled = true;
+                    
+                    try {
+                        console.log('🧪 Testing configuration for year:', currentYear);
+                        console.log('📋 Current config:', SPREADSHEET_CONFIG[currentYear]);
+                        
+                        await loadData(currentYear);
+                        alert('✅ Konfigurasi berhasil disimpan dan data berhasil dimuat!');
+                    } catch (error) {
+                        alert(`⚠️ Konfigurasi disimpan tapi gagal memuat data:\n\n${error.message}\n\nSilakan periksa konfigurasi Google Sheets.`);
+                    } finally {
+                        testBtn.textContent = originalText;
+                        testBtn.disabled = false;
+                    }
+                }
+            });
+
+            document.getElementById('resetConfig').addEventListener('click', function() {
+                if (confirm('Yakin ingin mereset semua konfigurasi?')) {
+                    resetConfiguration();
+                }
+            });
+
+            // Refresh button
+            document.getElementById('refreshBtn').addEventListener('click', refreshData);
+
+            // Year toggle
+            document.getElementById('yearToggle').addEventListener('change', function() {
+                currentYear = this.checked ? 2025 : 2024;
+                document.getElementById('currentYearDisplay').textContent = currentYear;
+                loadData(currentYear);
+            });
+
+            // Filter buttons
+            document.getElementById('applyFilters').addEventListener('click', applyFilters);
+            document.getElementById('resetFilters').addEventListener('click', resetFilters);
+
+            // Export buttons
+            document.getElementById('exportCSV').addEventListener('click', exportToCSV);
+            document.getElementById('exportXLSX').addEventListener('click', exportToXLSX);
+            
+            // Room table controls
+            document.getElementById('roomSearch').addEventListener('input', updateRoomTable);
+            document.getElementById('roomRowsPerPage').addEventListener('change', () => {
+                currentRoomPage = 1;
+                updateRoomTable();
+            });
+            document.getElementById('exportRoomCSV').addEventListener('click', exportRoomToCSV);
+            document.getElementById('exportRoomXLSX').addEventListener('click', exportRoomToXLSX);
+            
+            // DPJP table controls
+            document.getElementById('dpjpSearchTable').addEventListener('input', updateDPJPTable);
+            document.getElementById('dpjpRowsPerPage').addEventListener('change', () => {
+                currentDPJPPage = 1;
+                updateDPJPTable();
+            });
+            document.getElementById('exportDPJPCSV').addEventListener('click', exportDPJPToCSV);
+            document.getElementById('exportDPJPXLSX').addEventListener('click', exportDPJPToXLSX);
+
+
+
+            // Checkbox event listeners
+            document.getElementById('selectAllMonths').addEventListener('change', function() {
+                const monthCheckboxes = document.querySelectorAll('.month-checkbox');
+                monthCheckboxes.forEach(cb => cb.checked = this.checked);
+            });
+
+            document.getElementById('selectAllDPJP').addEventListener('change', function() {
+                const dpjpCheckboxes = document.querySelectorAll('.dpjp-checkbox');
+                dpjpCheckboxes.forEach(cb => cb.checked = this.checked);
+            });
+
+            // DPJP search functionality
+            document.getElementById('dpjpSearch').addEventListener('input', function() {
+                const searchTerm = this.value;
+                populateDPJPFilter(searchTerm);
+            });
+
+            // Individual checkbox listeners (delegated)
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('month-checkbox')) {
+                    const allMonthCheckboxes = document.querySelectorAll('.month-checkbox');
+                    const checkedMonthCheckboxes = document.querySelectorAll('.month-checkbox:checked');
+                    document.getElementById('selectAllMonths').checked = allMonthCheckboxes.length === checkedMonthCheckboxes.length;
+                }
+                
+                if (e.target.classList.contains('dpjp-checkbox')) {
+                    updateSelectAllDPJPState();
+                }
+            });
+
+            // Chart toggle buttons
+            document.getElementById('chartTypeToggle').addEventListener('click', toggleChartType);
+            document.getElementById('patientChartTypeToggle').addEventListener('click', togglePatientChartType);
+
+            // Close modal when clicking outside
+            document.getElementById('configModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.add('hidden');
+                }
+            });
+
+            // Filter toggle functionality
+            document.getElementById('toggleFilters').addEventListener('click', function() {
+                const filterContent = document.getElementById('filterContent');
+                const toggleText = document.getElementById('filterToggleText');
+                const toggleIcon = document.getElementById('filterToggleIcon');
+                
+                if (filterContent.style.display === 'none') {
+                    filterContent.style.display = 'block';
+                    toggleText.textContent = 'Sembunyikan Filter';
+                    toggleIcon.textContent = '▲';
+                } else {
+                    filterContent.style.display = 'none';
+                    toggleText.textContent = 'Tampilkan Filter';
+                    toggleIcon.textContent = '▼';
+                }
+            });
+
+            // Tab functionality
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetTab = this.getAttribute('data-tab');
+                    
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.tab-button').forEach(btn => {
+                        btn.classList.remove('active', 'border-blue-500', 'text-blue-600');
+                        btn.classList.add('border-transparent', 'text-gray-500');
+                    });
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active', 'border-blue-500', 'text-blue-600');
+                    this.classList.remove('border-transparent', 'text-gray-500');
+                    
+                    // Hide all tab contents
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    
+                    // Show target tab content
+                    document.getElementById(targetTab + '-tab').classList.remove('hidden');
+                });
+            });
+
+            // Load initial data
+            loadData(currentYear);
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96ab387383e7ec6e',t:'MTc1NDQ0ODU2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
