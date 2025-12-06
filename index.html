@@ -432,12 +432,20 @@ function testFunction() {
     </div>
 
     <!-- Loading Indicator -->
-    <div id="loadingIndicator" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-8 text-center">
-            <div class="loading w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full mx-auto mb-4"></div>
-            <p class="text-gray-600">Loading data...</p>
+<div id="loadingIndicator" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+    <div class="bg-white/90 shadow-2xl rounded-2xl p-10 text-center border border-white/30">
+        
+        <!-- Premium Loader -->
+        <div class="premium-loader w-20 h-20 mx-auto mb-6 relative">
+            <div class="ring ring1"></div>
+            <div class="ring ring2"></div>
+            <div class="ring center-dot"></div>
         </div>
+
+        <p class="text-gray-700 font-medium text-lg tracking-wide">Loading data...</p>
     </div>
+</div>
+
 
     <!-- Main Content -->
     <div class="w-full px-6 py-6">
