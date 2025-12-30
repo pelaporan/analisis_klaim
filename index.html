@@ -434,70 +434,79 @@ function testFunction() {
 <!-- Loading Indicator -->
 <div id="loadingIndicator" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
 
-    <style>
-        .premium-loader {
-            position: relative;
-        }
+  <style>
+    .premium-loader {
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
 
-        .premium-loader .ring {
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            border: 4px solid transparent;
-        }
+    .premium-loader .ring {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 4px solid transparent;
+      box-sizing: border-box;
+    }
 
-        .ring1 {
-            border-top-color: #2563eb;
-            border-right-color: #60a5fa;
-            animation: spin 1s linear infinite;
-            filter: drop-shadow(0 0 6px #60a5fa);
-        }
+    .ring1 {
+      border-top-color: #2563eb;
+      border-right-color: #60a5fa;
+      animation: spin 1s linear infinite;
+    }
 
-        .ring2 {
-            border-bottom-color: #2563eb;
-            border-left-color: #3b82f6;
-            animation: spinReverse 1.3s linear infinite;
-            filter: drop-shadow(0 0 8px #2563eb);
-        }
+    .ring2 {
+      border-bottom-color: #2563eb;
+      border-left-color: #3b82f6;
+      animation: spinReverse 1.4s linear infinite;
+    }
 
-        .center-dot {
-            width: 14px;
-            height: 14px;
-            background: radial-gradient(circle, #93c5fd, #2563eb);
-            border-radius: 50%;
-            position: absolute;
-            inset: 33%;
-            animation: pulse 1.2s ease-in-out infinite;
-        }
+    .center-dot {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 14px;
+      height: 14px;
+      background: radial-gradient(circle, #93c5fd, #2563eb);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      animation: pulse 1.2s ease-in-out infinite;
+    }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
 
-        @keyframes spinReverse {
-            to { transform: rotate(-360deg); }
-        }
+    @keyframes spinReverse {
+      0% { transform: rotate(360deg); }
+      100% { transform: rotate(0deg); }
+    }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.3); opacity: 1; }
-        }
-    </style>
+    @keyframes pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+      50% { transform: translate(-50%, -50%) scale(1.4); opacity: 1; }
+    }
+  </style>
 
-    <!-- Box -->
-    <div class="bg-white/90 shadow-2xl rounded-2xl p-10 text-center border border-white/30">
-        
-        <!-- Premium Loader -->
-        <div class="premium-loader w-20 h-20 mx-auto mb-6 relative">
-            <div class="ring ring1"></div>
-            <div class="ring ring2"></div>
-            <div class="ring center-dot"></div>
-        </div>
-
-        <!-- Text -->
-        <p class="text-gray-700 font-medium text-lg tracking-wide">Loading data...</p>
+  <!-- Box -->
+  <div class="bg-white/90 shadow-2xl rounded-2xl p-10 text-center">
+    
+    <!-- Loader -->
+    <div class="premium-loader mx-auto mb-6">
+      <div class="ring ring1"></div>
+      <div class="ring ring2"></div>
+      <div class="center-dot"></div>
     </div>
+
+    <p class="text-gray-700 font-medium text-lg tracking-wide">
+      Loading data...
+    </p>
+  </div>
+
 </div>
+
 
 
 
