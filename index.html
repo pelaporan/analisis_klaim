@@ -435,77 +435,120 @@ function testFunction() {
 <div id="loadingIndicator" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
 
   <style>
-    .premium-loader {
+    .walking-loader {
       position: relative;
       width: 80px;
-      height: 80px;
+      height: 120px;
+      margin: auto;
     }
 
-    .premium-loader .ring {
-      position: absolute;
-      width: 100%;
-      height: 100%;
+    /* Kepala */
+    .head {
+      width: 20px;
+      height: 20px;
+      background: #2563eb;
       border-radius: 50%;
-      border: 4px solid transparent;
-      box-sizing: border-box;
+      margin: 0 auto;
     }
 
-    .ring1 {
-      border-top-color: #2563eb;
-      border-right-color: #60a5fa;
-      animation: spin 1s linear infinite;
+    /* Badan */
+    .body {
+      width: 6px;
+      height: 40px;
+      background: #2563eb;
+      margin: 4px auto;
     }
 
-    .ring2 {
-      border-bottom-color: #2563eb;
-      border-left-color: #3b82f6;
-      animation: spinReverse 1.4s linear infinite;
-    }
-
-    .center-dot {
+    /* Tangan & kaki */
+    .arm, .leg {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 14px;
-      height: 14px;
-      background: radial-gradient(circle, #93c5fd, #2563eb);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      animation: pulse 1.2s ease-in-out infinite;
+      width: 6px;
+      height: 30px;
+      background: #3b82f6;
+      top: 45px;
+      transform-origin: top center;
     }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .arm.left {
+      left: 30px;
+      animation: armLeft 0.8s ease-in-out infinite;
     }
 
-    @keyframes spinReverse {
-      0% { transform: rotate(360deg); }
-      100% { transform: rotate(0deg); }
+    .arm.right {
+      right: 30px;
+      animation: armRight 0.8s ease-in-out infinite;
     }
 
-    @keyframes pulse {
-      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
-      50% { transform: translate(-50%, -50%) scale(1.4); opacity: 1; }
+    .leg.left {
+      left: 32px;
+      top: 75px;
+      height: 35px;
+      animation: legLeft 0.8s ease-in-out infinite;
+    }
+
+    .leg.right {
+      right: 32px;
+      top: 75px;
+      height: 35px;
+      animation: legRight 0.8s ease-in-out infinite;
+    }
+
+    /* Animasi */
+    @keyframes armLeft {
+      0%, 100% { transform: rotate(30deg); }
+      50% { transform: rotate(-30deg); }
+    }
+
+    @keyframes armRight {
+      0%, 100% { transform: rotate(-30deg); }
+      50% { transform: rotate(30deg); }
+    }
+
+    @keyframes legLeft {
+      0%, 100% { transform: rotate(-20deg); }
+      50% { transform: rotate(30deg); }
+    }
+
+    @keyframes legRight {
+      0%, 100% { transform: rotate(30deg); }
+      50% { transform: rotate(-20deg); }
+    }
+
+    /* Efek maju */
+    .walker {
+      animation: walkMove 1.2s ease-in-out infinite;
+    }
+
+    @keyframes walkMove {
+      0%, 100% { transform: translateX(-10px); }
+      50% { transform: translateX(10px); }
     }
   </style>
 
   <!-- Box -->
   <div class="bg-white/90 shadow-2xl rounded-2xl p-10 text-center">
-    
-    <!-- Loader -->
-    <div class="premium-loader mx-auto mb-6">
-      <div class="ring ring1"></div>
-      <div class="ring ring2"></div>
-      <div class="center-dot"></div>
+
+    <!-- Walking Loader -->
+    <div class="walker">
+      <div class="walking-loader">
+        <div class="head"></div>
+        <div class="body"></div>
+
+        <div class="arm left"></div>
+        <div class="arm right"></div>
+
+        <div class="leg left"></div>
+        <div class="leg right"></div>
+      </div>
     </div>
 
-    <p class="text-gray-700 font-medium text-lg tracking-wide">
-      Loading data...
+    <p class="text-gray-700 font-medium text-lg tracking-wide mt-6">
+      Memproses data klaim...
     </p>
   </div>
 
 </div>
+
 
 
 
