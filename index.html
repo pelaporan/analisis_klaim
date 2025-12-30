@@ -435,119 +435,148 @@ function testFunction() {
 <div id="loadingIndicator" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
 
   <style>
-    .walking-loader {
+    .runner {
       position: relative;
-      width: 80px;
-      height: 120px;
-      margin: auto;
+      width: 120px;
+      height: 140px;
+      animation: runMove 1s ease-in-out infinite;
     }
 
     /* Kepala */
     .head {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       background: #2563eb;
       border-radius: 50%;
-      margin: 0 auto;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
     }
 
-    /* Badan */
+    /* Badan condong */
     .body {
       width: 6px;
-      height: 40px;
+      height: 45px;
       background: #2563eb;
-      margin: 4px auto;
-    }
-
-    /* Tangan & kaki */
-    .arm, .leg {
       position: absolute;
-      width: 6px;
-      height: 30px;
-      background: #3b82f6;
-      top: 45px;
+      top: 22px;
+      left: 50%;
+      transform: translateX(-50%) rotate(12deg);
       transform-origin: top center;
     }
 
+    /* Lengan & kaki */
+    .arm, .leg {
+      position: absolute;
+      width: 6px;
+      background: #3b82f6;
+      transform-origin: top center;
+    }
+
+    .arm {
+      height: 34px;
+      top: 30px;
+    }
+
+    .leg {
+      height: 40px;
+      top: 65px;
+    }
+
+    /* Tangan */
     .arm.left {
-      left: 30px;
-      animation: armLeft 0.8s ease-in-out infinite;
+      left: 46%;
+      animation: armRunLeft 0.5s ease-in-out infinite;
     }
 
     .arm.right {
-      right: 30px;
-      animation: armRight 0.8s ease-in-out infinite;
+      left: 54%;
+      animation: armRunRight 0.5s ease-in-out infinite;
     }
 
+    /* Kaki */
     .leg.left {
-      left: 32px;
-      top: 75px;
-      height: 35px;
-      animation: legLeft 0.8s ease-in-out infinite;
+      left: 47%;
+      animation: legRunLeft 0.5s ease-in-out infinite;
     }
 
     .leg.right {
-      right: 32px;
-      top: 75px;
-      height: 35px;
-      animation: legRight 0.8s ease-in-out infinite;
+      left: 53%;
+      animation: legRunRight 0.5s ease-in-out infinite;
     }
 
-    /* Animasi */
-    @keyframes armLeft {
-      0%, 100% { transform: rotate(30deg); }
-      50% { transform: rotate(-30deg); }
+    /* Animasi lari */
+    @keyframes armRunLeft {
+      0%, 100% { transform: rotate(55deg); }
+      50% { transform: rotate(-55deg); }
     }
 
-    @keyframes armRight {
-      0%, 100% { transform: rotate(-30deg); }
-      50% { transform: rotate(30deg); }
+    @keyframes armRunRight {
+      0%, 100% { transform: rotate(-55deg); }
+      50% { transform: rotate(55deg); }
     }
 
-    @keyframes legLeft {
-      0%, 100% { transform: rotate(-20deg); }
-      50% { transform: rotate(30deg); }
+    @keyframes legRunLeft {
+      0%, 100% { transform: rotate(-40deg); }
+      50% { transform: rotate(70deg); }
     }
 
-    @keyframes legRight {
-      0%, 100% { transform: rotate(30deg); }
-      50% { transform: rotate(-20deg); }
+    @keyframes legRunRight {
+      0%, 100% { transform: rotate(70deg); }
+      50% { transform: rotate(-40deg); }
     }
 
-    /* Efek maju */
-    .walker {
-      animation: walkMove 1.2s ease-in-out infinite;
+    /* Efek maju cepat */
+    @keyframes runMove {
+      0% { transform: translateX(-18px); }
+      50% { transform: translateX(18px); }
+      100% { transform: translateX(-18px); }
     }
 
-    @keyframes walkMove {
-      0%, 100% { transform: translateX(-10px); }
-      50% { transform: translateX(10px); }
+    /* Efek bayangan tanah */
+    .shadow {
+      width: 60px;
+      height: 10px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 50%;
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: shadowPulse 0.5s ease-in-out infinite;
+    }
+
+    @keyframes shadowPulse {
+      0%, 100% { transform: translateX(-50%) scaleX(1); }
+      50% { transform: translateX(-50%) scaleX(0.7); }
     }
   </style>
 
   <!-- Box -->
   <div class="bg-white/90 shadow-2xl rounded-2xl p-10 text-center">
 
-    <!-- Walking Loader -->
-    <div class="walker">
-      <div class="walking-loader">
-        <div class="head"></div>
-        <div class="body"></div>
+    <!-- Runner -->
+    <div class="runner mx-auto mb-6">
+      <div class="head"></div>
+      <div class="body"></div>
 
-        <div class="arm left"></div>
-        <div class="arm right"></div>
+      <div class="arm left"></div>
+      <div class="arm right"></div>
 
-        <div class="leg left"></div>
-        <div class="leg right"></div>
-      </div>
+      <div class="leg left"></div>
+      <div class="leg right"></div>
+
+      <div class="shadow"></div>
     </div>
 
-    <p class="text-gray-700 font-medium text-lg tracking-wide mt-6">
-      Memproses data klaim...
+    <p class="text-gray-700 font-medium text-lg tracking-wide">
+      Memproses klaim JKN...
     </p>
   </div>
 
 </div>
+
 
 
 
